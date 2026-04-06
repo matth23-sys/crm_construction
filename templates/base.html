@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}CRM Construction{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <h1>CRM Construction</h1>
+        {% if request.user.is_authenticated %}
+            <p>Sesión activa: {{ request.user }}</p>
+            <p>
+                <a href="{% url 'dashboard_home' %}">Dashboard</a> |
+                <a href="{% url 'user_profile' %}">Perfil</a> |
+                <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit">Salir</button>
+                </form>
+            </p>
+        {% endif %}
+        <hr>
+    </header>
+
+    <main>
+        {% include "includes/messages.html" %}
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
