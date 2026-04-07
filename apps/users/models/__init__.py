@@ -1,3 +1,4 @@
-from .entities import User
 
-__all__ = ["User"]
+from .entities import User, UserAccessLog
+
+__all__ = ["User", "UserAccessLog"]

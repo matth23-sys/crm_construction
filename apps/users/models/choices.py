@@ -1,7 +1,23 @@
-"""
-Archivo reservado para choices futuros del módulo users.
+from django.db import models
 
-En Fase 1 no se requieren choices específicos porque el bootstrap del
-usuario custom es técnico y mínimo. La ampliación real del módulo users
-se hará en Fase 2.
-"""
+
+class DefaultGroup(models.TextChoices):
+    ADMINISTRADORES = "Administradores", "Administradores"
+    COORDINADORES = "Coordinadores", "Coordinadores"
+    COMERCIAL = "Comercial", "Comercial"
+    CUADRILLA = "Cuadrilla", "Cuadrilla"
+
+
+class AccessEventType(models.TextChoices):
+    LOGIN = "login", "Inicio de sesión"
+    LOGOUT = "logout", "Cierre de sesión"
+    PASSWORD_RESET_REQUEST = "password_reset_request", "Solicitud de reseteo"
+    PASSWORD_RESET_COMPLETE = "password_reset_complete", "Reseteo completado"
+    ACCESS_DENIED = "access_denied", "Acceso denegado"
+
+
+class AccessEventStatus(models.TextChoices):
+    SUCCESS = "success", "Éxito"
+    FAILED = "failed", "Fallido"
+    DENIED = "denied", "Denegado"
+    INFO = "info", "Informativo"

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Roles y permisos</h1>
+
+  <p><a href="{% url 'users:role_create' %}">Crear rol</a></p>
+
+  <ul>
+    {% for role in roles %}
+      <li>
+        <strong>{{ role.name }}</strong>
+        ({{ role.user_count }} usuario{{ role.user_count|pluralize }})
+        - <a href="{% url 'users:role_update' role.pk %}">Editar</a>
+      </li>
+    {% empty %}
+      <li>No hay roles creados.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

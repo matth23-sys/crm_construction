@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Logs de acceso</h1>
+
+  <ul>
+    {% for log in logs %}
+      <li>
+        {{ log.created_at }} |
+        {{ log.get_event_type_display }} |
+        {{ log.get_status_display }} |
+        {{ log.identifier }} |
+        {{ log.ip_address|default:"-" }} |
+        {{ log.detail }}
+      </li>
+    {% empty %}
+      <li>No hay registros de acceso.</li>
+    {% endfor %}
+  </ul>
+
+  {% if is_paginated %}
+    <div>
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+      {% endif %}
+      <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}

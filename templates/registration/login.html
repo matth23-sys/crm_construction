@@ -15,3 +15,18 @@
         <button type="submit">Entrar</button>
     </form>
 {% endblock %}
+
+
+{% extends "base.html" %}
+{% block content %}
+  <h1>Iniciar sesión</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Entrar</button>
+  </form>
+
+  <p>
+    <a href="{% url 'password_reset' %}">¿Olvidaste tu contraseña?</a>
+  </p>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}{{ client.display_name }}{% endblock %}
+
+{% block content %}
+  <h1>{{ client.display_name }}</h1>
+
+  <p><strong>Tipo:</strong> {{ client.get_client_type_display }}</p>
+  <p><strong>Estado:</strong> {{ client.get_status_display }}</p>
+  <p><strong>Documento:</strong> {{ client.document_number|default:"-" }}</p>
+  <p><strong>Email:</strong> {{ client.email|default:"-" }}</p>
+  <p><strong>Teléfono:</strong> {{ client.phone|default:"-" }}</p>
+  <p><strong>Teléfono alterno:</strong> {{ client.alternate_phone|default:"-" }}</p>
+  <p><strong>Dirección:</strong> {{ client.address|default:"-" }}</p>
+  <p><strong>Ciudad:</strong> {{ client.city|default:"-" }}</p>
+  <p><strong>Provincia/Estado:</strong> {{ client.state|default:"-" }}</p>
+  <p><strong>País:</strong> {{ client.country|default:"-" }}</p>
+  <p><strong>Notas internas:</strong></p>
+  <div>{{ client.notes|linebreaks }}</div>
+
+  {% if client.deactivated_at %}
+    <p>
+      <strong>Desactivado el:</strong> {{ client.deactivated_at|date:"d/m/Y H:i" }}
+      {% if client.deactivated_by %}
+        por {{ client.deactivated_by }}
+      {% endif %}
+    </p>
+  {% endif %}
+
+  <p>
+    <a href="{% url 'clients:list' %}">Volver al listado</a>
+
+    {% if perms.clients.change_client %}
+      | <a href="{% url 'clients:edit' client.pk %}">Editar</a>
+    {% endif %}
+  </p>
+
+  {% if client.is_active %}
+    {% if perms.clients.deactivate_client %}
+      <form method="post" action="{% url 'clients:deactivate' client.pk %}">
+        {% csrf_token %}
+        <button type="submit">Desactivar cliente</button>
+      </form>
+    {% endif %}
+  {% else %}
+    {% if perms.clients.reactivate_client %}
+      <form method="post" action="{% url 'clients:reactivate' client.pk %}">
+        {% csrf_token %}
+        <button type="submit">Reactivar cliente</button>
+      </form>
+    {% endif %}
+  {% endif %}
+
+  <hr>
+
+  <h2>Registrar interacción</h2>
+
+  {% if perms.clients.add_clientinteraction %}
+    <form method="post" action="{% url 'clients:interaction_create' client.pk %}">
+      {% csrf_token %}
+      {{ interaction_form.as_p }}
+      <button type="submit">Guardar interacción</button>
+    </form>
+  {% else %}
+    <p>No tienes permisos para registrar interacciones.</p>
+  {% endif %}
+
+  <hr>
+
+  <h2>Historial de interacciones</h2>
+
+  {% if client.interactions.all %}
+    {% for interaction in client.interactions.all %}
+      <article>
+        <h3>{{ interaction.summary }}</h3>
+        <p>
+          <strong>Tipo:</strong> {{ interaction.get_interaction_type_display }} |
+          <strong>Fecha:</strong> {{ interaction.occurred_at|date:"d/m/Y H:i" }}
+        </p>
+
+        {% if interaction.registered_by %}
+          <p><strong>Registrado por:</strong> {{ interaction.registered_by }}</p>
+        {% endif %}
+
+        {% if interaction.description %}
+          <div>{{ interaction.description|linebreaks }}</div>
+        {% endif %}
+
+        {% if interaction.follow_up_at %}
+          <p><strong>Seguimiento:</strong> {{ interaction.follow_up_at|date:"d/m/Y H:i" }}</p>
+        {% endif %}
+      </article>
+      <hr>
+    {% endfor %}
+  {% else %}
+    <p>Este cliente todavía no tiene interacciones registradas.</p>
+  {% endif %}
+{% endblock %}

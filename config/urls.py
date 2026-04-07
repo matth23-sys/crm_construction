@@ -1,29 +1,47 @@
-from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
 from django.urls import include, path
-from django.views.generic import TemplateView
+from django.views.generic import RedirectView, TemplateView
 
-
-def root_redirect(request):
-    if request.user.is_authenticated:
-        return redirect("dashboard_home")
-    return redirect("login")
-
-
-dashboard_view = login_required(
-    TemplateView.as_view(template_name="dashboard/home.html")
+from apps.users.views import (
+    CRMLoginView,
+    CRMLogoutView,
+    CRMPasswordResetCompleteView,
+    CRMPasswordResetConfirmView,
+    CRMPasswordResetDoneView,
+    CRMPasswordResetView,
 )
 
+handler403 = "apps.users.views.permission_denied_view"
+
 urlpatterns = [
-    path("", root_redirect, name="root"),
+    path("", RedirectView.as_view(pattern_name="dashboard_home", permanent=False)),
     path("admin/", admin.site.urls),
-    path("accounts/", include("django.contrib.auth.urls")),
-    path("users/", include("apps.users.urls")),
-    path("dashboard/", dashboard_view, name="dashboard_home"),
+
+    path("accounts/login/", CRMLoginView.as_view(), name="login"),
+    path("accounts/logout/", CRMLogoutView.as_view(), name="logout"),
+    path("accounts/password-reset/", CRMPasswordResetView.as_view(), name="password_reset"),
+    path(
+        "accounts/password-reset/done/",
+        CRMPasswordResetDoneView.as_view(),
+        name="password_reset_done",
+    ),
+    path(
+        "accounts/reset/<uidb64>/<token>/",
+        CRMPasswordResetConfirmView.as_view(),
+        name="password_reset_confirm",
+    ),
+    path(
+        "accounts/reset/done/",
+        CRMPasswordResetCompleteView.as_view(),
+        name="password_reset_complete",
+    ),
+
+    path("users/", include(("apps.users.urls", "users"), namespace="users")),
+    path(
+        "dashboard/",
+        TemplateView.as_view(template_name="dashboard/home.html"),
+        name="dashboard_home",
+    ),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

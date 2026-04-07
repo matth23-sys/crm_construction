@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Clientes{% endblock %}
+
+{% block content %}
+  <h1>Clientes</h1>
+
+  <form method="get">
+    {{ filter_form.as_p }}
+    <button type="submit">Filtrar</button>
+    <a href="{% url 'clients:list' %}">Limpiar</a>
+  </form>
+
+  {% if perms.clients.add_client %}
+    <p>
+      <a href="{% url 'clients:create' %}">Nuevo cliente</a>
+    </p>
+  {% endif %}
+
+  {% if clients %}
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Tipo</th>
+          <th>Contacto</th>
+          <th>Estado</th>
+          <th>Interacciones</th>
+          <th>Última interacción</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for client in clients %}
+          <tr>
+            <td>
+              <a href="{% url 'clients:detail' client.pk %}">{{ client.display_name }}</a>
+              {% if client.document_number %}
+                <br>{{ client.document_number }}
+              {% endif %}
+            </td>
+            <td>{{ client.get_client_type_display }}</td>
+            <td>
+              {% if client.email %}{{ client.email }}<br>{% endif %}
+              {% if client.phone %}{{ client.phone }}{% endif %}
+            </td>
+            <td>{{ client.get_status_display }}</td>
+            <td>{{ client.interactions_count }}</td>
+            <td>
+              {% if client.last_interaction_at %}
+                {{ client.last_interaction_at|date:"d/m/Y H:i" }}
+              {% else %}
+                Sin registros
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'clients:detail' client.pk %}">Ver</a>
+              {% if perms.clients.change_client %}
+                | <a href="{% url 'clients:edit' client.pk %}">Editar</a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if is_paginated %}
+      <nav>
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    <p>No hay clientes registrados con los filtros actuales.</p>
+  {% endif %}
+{% endblock %}
