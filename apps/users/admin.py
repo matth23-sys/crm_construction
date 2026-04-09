@@ -1,3 +1,4 @@
+﻿# -*- coding: utf-8 -*-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
@@ -9,74 +10,72 @@ class UserAdmin(DjangoUserAdmin):
     list_display = (
         "username",
         "email",
-        "first_name",
-        "last_name",
+        "full_name",
         "job_title",
         "is_active",
         "is_staff",
-        "is_superuser",
+        "must_change_password",
+        "created_at",
     )
-    list_filter = ("is_active", "is_staff", "is_superuser", "groups")
-    search_fields = ("username", "email", "first_name", "last_name", "job_title")
-    ordering = ("username",)
-    filter_horizontal = ("groups", "user_permissions")
-
-    fieldsets = DjangoUserAdmin.fieldsets + (
+    list_filter = ("is_active", "is_staff", "is_superuser", "must_change_password", "job_title", "groups")
+    search_fields = ("username", "email", "first_name", "last_name", "phone")
+    ordering = ("-created_at",)
+    
+    fieldsets = (
+        (None, {"fields": ("username", "password")}),
+        ("Informacion personal", {"fields": ("first_name", "last_name", "email", "phone", "job_title")}),
         (
-            "Información CRM",
+            "Permisos y estado",
             {
                 "fields": (
-                    "phone",
-                    "job_title",
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
                     "must_change_password",
-                )
+                    "groups",
+                    "user_permissions",
+                ),
+            },
+        ),
+        ("Fechas importantes", {"fields": ("last_login", "created_at", "updated_at")}),
+    )
+    
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("username", "email", "password1", "password2", "must_change_password"),
             },
         ),
     )
-    add_fieldsets = DjangoUserAdmin.add_fieldsets + (
-        (
-            "Información CRM",
-            {
-                "fields": (
-                    "email",
-                    "phone",
-                    "job_title",
-                    "must_change_password",
-                )
-            },
-        ),
-    )
+    
+    readonly_fields = ("created_at", "updated_at", "last_login")
 
 
 @admin.register(UserAccessLog)
 class UserAccessLogAdmin(admin.ModelAdmin):
     list_display = (
-        "created_at",
+        "id",
         "user",
-        "identifier",
         "event_type",
-        "status",
+        "event_status",
+        "identifier_used",
         "ip_address",
-        "request_id",
+        "created_at",
     )
-    list_filter = ("event_type", "status", "created_at")
-    search_fields = ("identifier", "detail", "ip_address", "request_id", "user__username")
+    list_filter = ("event_type", "event_status", "created_at")
+    search_fields = ("user__email", "user__username", "identifier_used", "ip_address")
     readonly_fields = (
-        "user",
-        "identifier",
-        "event_type",
-        "status",
-        "ip_address",
-        "user_agent",
-        "request_id",
-        "detail",
-        "metadata",
-        "created_at",
-        "updated_at",
+        "user", "event_type", "event_status", "identifier_used",
+        "ip_address", "user_agent", "request_id", "details",
+        "created_at", "updated_at"
     )
-
+    ordering = ("-created_at",)
+    date_hierarchy = "created_at"
+    
     def has_add_permission(self, request):
         return False
-
+    
     def has_change_permission(self, request, obj=None):
         return False

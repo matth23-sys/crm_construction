@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import (
     LoginView,
@@ -15,12 +17,11 @@ from django.urls import reverse_lazy
 from django.views import View, generic
 
 from .forms import (
-    CustomAuthenticationForm,
-    ProfileForm,
-    RoleForm,
     UserCreateForm,
-    UserPasswordResetForm,
     UserUpdateForm,
+    UserProfileForm,
+    UserFilterForm,
+    RoleForm,
 )
 from .models.choices import AccessEventStatus, AccessEventType
 from .permissions import AppPermissionRequiredMixin
@@ -46,8 +47,8 @@ User = get_user_model()
 
 class CRMLoginView(LoginView):
     template_name = "registration/login.html"
-    authentication_form = CustomAuthenticationForm
     redirect_authenticated_user = True
+    form_class = AuthenticationForm  # ← Usar AuthenticationForm de Django
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -96,7 +97,7 @@ class CRMPasswordResetView(PasswordResetView):
     template_name = "registration/password_reset_form.html"
     email_template_name = "registration/password_reset_email.html"
     subject_template_name = "registration/password_reset_subject.txt"
-    form_class = UserPasswordResetForm
+    form_class = PasswordResetForm  # ← Usar PasswordResetForm de Django
     success_url = reverse_lazy("password_reset_done")
 
     def form_valid(self, form):
@@ -137,7 +138,7 @@ class CRMPasswordResetCompleteView(PasswordResetCompleteView):
 
 class ProfileView(generic.UpdateView):
     template_name = "users/profile.html"
-    form_class = ProfileForm
+    form_class = UserProfileForm  # ← Corregido: UserProfileForm en lugar de ProfileForm
     success_url = reverse_lazy("users:profile")
 
     def dispatch(self, request, *args, **kwargs):
@@ -169,7 +170,7 @@ class UserListView(AppPermissionRequiredMixin, generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["roles"] = get_role_queryset()
+        context["filter_form"] = UserFilterForm(self.request.GET or None)  # ← Agregado
         context["search"] = self.request.GET.get("search", "")
         context["selected_group"] = self.request.GET.get("group", "")
         context["selected_is_active"] = self.request.GET.get("is_active", "")
