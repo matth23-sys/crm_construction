@@ -29,7 +29,26 @@ LOCAL_APPS = [
 ]
 
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
+INSTALLED_APPS = [
+    # Django core apps
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',   # <-- Asegurar que esté presente
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+
+    # Third-party apps (si las hay)
+    # 'django_extensions',
+    # 'rest_framework', etc.
+
+    # Local apps
+    'core',
+    'apps.users',
+    'apps.clients',                  # <-- Ya agregada
+]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
