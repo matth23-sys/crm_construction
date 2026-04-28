@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:flex-start;">
+    <div>
+      <h1>{{ visit.title }}</h1>
+      <p>
+        <strong>Client:</strong> {{ visit.client }}<br>
+        <strong>Project:</strong> {{ visit.project|default:"—" }}<br>
+        <strong>Responsible:</strong> {{ visit.responsible }}<br>
+        <strong>Status:</strong> {{ visit.get_status_display }}<br>
+        <strong>Scheduled:</strong> {{ visit.scheduled_start|date:"Y-m-d H:i" }} → {{ visit.scheduled_end|date:"Y-m-d H:i" }}<br>
+        <strong>Location:</strong> {{ visit.location|default:"—" }}
+      </p>
+    </div>
+
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+      {% if can_edit %}
+        <a href="{% url 'visits:edit' pk=visit.pk %}">Edit visit</a>
+      {% endif %}
+      <a href="{% url 'visits:list' %}">Back to list</a>
+    </div>
+  </div>
+
+  <hr>
+
+  <section style="margin-bottom:1.5rem;">
+    <h3>Visit details</h3>
+    <p>{{ visit.description|default:"No additional details." }}</p>
+
+    {% if visit.reschedule_count %}
+      <p>
+        <strong>Rescheduled:</strong> {{ visit.reschedule_count }} time(s)<br>
+        <strong>Previous schedule:</strong>
+        {{ visit.previous_scheduled_start|date:"Y-m-d H:i"|default:"—" }}
+        →
+        {{ visit.previous_scheduled_end|date:"Y-m-d H:i"|default:"—" }}<br>
+        <strong>Rescheduled at:</strong> {{ visit.rescheduled_at|date:"Y-m-d H:i"|default:"—" }}<br>
+        <strong>Rescheduled by:</strong> {{ visit.rescheduled_by|default:"—" }}
+      </p>
+    {% endif %}
+  </section>
+
+  <section style="margin-bottom:1.5rem;">
+    <h3>Contact information</h3>
+    <p>
+      <strong>Name:</strong> {{ visit.contact_name|default:"—" }}<br>
+      <strong>Email:</strong> {{ visit.contact_email|default:"—" }}<br>
+      <strong>Phone:</strong> {{ visit.contact_phone|default:"—" }}
+    </p>
+  </section>
+
+  <section>
+    <h3>Reminder logs</h3>
+
+    {% if can_view_logs %}
+      {% if reminder_logs %}
+        <div style="display:grid;gap:1rem;">
+          {% for log in reminder_logs %}
+            <article style="padding:1rem;border:1px solid #ddd;border-radius:12px;">
+              <p style="margin:0;">
+                <strong>Type:</strong> {{ log.get_reminder_type_display }}<br>
+                <strong>Status:</strong> {{ log.get_status_display }}<br>
+                <strong>Reference date:</strong> {{ log.reference_date }}<br>
+                <strong>Recipient:</strong> {{ log.recipient_email|default:"—" }}<br>
+                <strong>Sent at:</strong> {{ log.sent_at|date:"Y-m-d H:i"|default:"—" }}<br>
+                <strong>Attempts:</strong> {{ log.attempt_count }}<br>
+                <strong>Error:</strong> {{ log.error_message|default:"—" }}
+              </p>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No reminder logs yet.</p>
+      {% endif %}
+    {% else %}
+      <p>You do not have permission to view reminder logs.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

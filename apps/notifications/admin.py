@@ -1,0 +1,1 @@
+# No admin registrations required in Phase 8.

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ project.name }}</h1>
+
+<div style="margin-bottom: 1rem;">
+    <a href="{% url 'projects:edit' project.pk %}">Edit project</a>
+</div>
+
+<section style="margin-bottom: 2rem;">
+    <h2>Project summary</h2>
+    <p><strong>Client:</strong> {{ project.client }}</p>
+    <p><strong>Opportunity:</strong> {{ project.opportunity|default:"—" }}</p>
+    <p><strong>Responsible:</strong> {{ project.responsible|default:"—" }}</p>
+    <p><strong>Status:</strong> {{ project.get_status_display }}</p>
+    <p><strong>Location:</strong> {{ project.location|default:"—" }}</p>
+    <p><strong>Contract amount:</strong> {{ project.contract_amount|default:"—" }}</p>
+    <p><strong>Start date:</strong> {{ project.start_date|default:"—" }}</p>
+    <p><strong>Expected end date:</strong> {{ project.expected_end_date|default:"—" }}</p>
+    <p><strong>Actual end date:</strong> {{ project.actual_end_date|default:"—" }}</p>
+    <p><strong>Description:</strong> {{ project.description|linebreaksbr|default:"—" }}</p>
+</section>
+
+<section style="margin-bottom: 2rem;">
+    <h2>Assignments</h2>
+
+    {% if assignments %}
+        <ul>
+            {% for assignment in assignments %}
+                <li>
+                    {{ assignment.user }} — {{ assignment.get_role_display }}
+                    {% if assignment.notes %} ({{ assignment.notes }}){% endif %}
+
+                    {% if can_manage_assignments %}
+                        <form method="post" action="{% url 'projects:assignment_deactivate' project.pk assignment.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit">Deactivate</button>
+                        </form>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No active assignments.</p>
+    {% endif %}
+
+    {% if can_manage_assignments %}
+        <h3>Add assignment</h3>
+        <form method="post" action="{% url 'projects:assignment_create' project.pk %}">
+            {% csrf_token %}
+            {{ assignment_form.as_p }}
+            <button type="submit">Add assignment</button>
+        </form>
+    {% endif %}
+</section>
+
+<section>
+    <h2>Internal notes</h2>
+
+    {% if notes %}
+        <ul>
+            {% for note in notes %}
+                <li style="margin-bottom: 1rem;">
+                    <p><strong>{{ note.author|default:"System" }}</strong> — {{ note.created_at }}</p>
+                    <p><strong>{{ note.get_note_type_display }}</strong></p>
+                    <p>{{ note.body|linebreaksbr }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No notes yet.</p>
+    {% endif %}
+
+    {% if can_add_project_note %}
+        <h3>Add note</h3>
+        <form method="post" action="{% url 'projects:note_create' project.pk %}">
+            {% csrf_token %}
+            {{ note_form.as_p }}
+            <button type="submit">Save note</button>
+        </form>
+    {% endif %}
+</section>
+<a href="{% url 'media_assets:project_gallery' project_id=object.id %}">
+  View project gallery
+</a>
+
+{% endblock %}

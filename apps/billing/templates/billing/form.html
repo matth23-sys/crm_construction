@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Billing Account{% endblock %}
+
+{% block extra_css %}
+<style>
+  .billing-form-wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 32px 0;
+  }
+
+  .billing-form-card {
+    background: #121212;
+    border: 1px solid #0077ff;
+    border-radius: 18px;
+    padding: 24px;
+  }
+
+  .billing-form-card h1 {
+    color: #ffffff;
+    margin-top: 0;
+  }
+
+  .billing-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .billing-field.full {
+    grid-column: 1 / -1;
+  }
+
+  .billing-field label {
+    color: #b0b0b0;
+    display: block;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .billing-field input,
+  .billing-field select,
+  .billing-field textarea {
+    width: 100%;
+    background: #050505;
+    border: 1px solid #1a1a1a;
+    color: #ffffff;
+    padding: 11px;
+    border-radius: 10px;
+  }
+
+  .billing-errors {
+    color: #ffffff;
+    background: #6e0101;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+
+  .billing-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .billing-btn {
+    border: 1px solid #0077ff;
+    background: #0055ff;
+    color: #ffffff;
+    padding: 11px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .billing-btn.secondary {
+    background: #121212;
+  }
+
+  @media (max-width: 760px) {
+    .billing-form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="billing-form-wrap">
+  <div class="billing-form-card">
+    <h1>{% if object %}Edit account receivable{% else %}Create account receivable{% endif %}</h1>
+
+    {% if form.non_field_errors %}
+      <div class="billing-errors">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="billing-form-grid">
+        <div class="billing-field">
+          <label>Client</label>
+          {{ form.client }}
+          {{ form.client.errors }}
+        </div>
+
+        <div class="billing-field">
+          <label>Project</label>
+          {{ form.project }}
+          {{ form.project.errors }}
+        </div>
+
+        <div class="billing-field">
+          <label>Title</label>
+          {{ form.title }}
+          {{ form.title.errors }}
+        </div>
+
+        <div class="billing-field">
+          <label>Invoice number</label>
+          {{ form.invoice_number }}
+          {{ form.invoice_number.errors }}
+        </div>
+
+        <div class="billing-field">
+          <label>Total amount</label>
+          {{ form.total_amount }}
+          {{ form.total_amount.errors }}
+        </div>
+
+        <div class="billing-field">
+          <label>Issued date</label>
+          {{ form.issued_date }}
+          {{ form.issued_date.errors }}
+        </div>
+
+        <div class="billing-field">
+          <label>Due date</label>
+          {{ form.due_date }}
+          {{ form.due_date.errors }}
+        </div>
+
+        <div class="billing-field full">
+          <label>Description</label>
+          {{ form.description }}
+          {{ form.description.errors }}
+        </div>
+
+        <div class="billing-field full">
+          <label>Notes</label>
+          {{ form.notes }}
+          {{ form.notes.errors }}
+        </div>
+      </div>
+
+      <div class="billing-actions">
+        <button type="submit" class="billing-btn">Save account</button>
+        <a href="{% url 'billing:list' %}" class="billing-btn secondary">Back to billing</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

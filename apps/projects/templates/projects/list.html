@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Projects</h1>
+
+<div style="margin-bottom: 1rem;">
+    <a href="{% url 'projects:create' %}">Create project</a>
+</div>
+
+<form method="get" style="margin-bottom: 1.5rem;">
+    <div>
+        <label for="{{ filter_form.q.id_for_label }}">Search</label>
+        {{ filter_form.q }}
+    </div>
+    <div>
+        <label for="{{ filter_form.status.id_for_label }}">Status</label>
+        {{ filter_form.status }}
+    </div>
+    <div>
+        <label for="{{ filter_form.client.id_for_label }}">Client</label>
+        {{ filter_form.client }}
+    </div>
+    <div>
+        <label for="{{ filter_form.responsible.id_for_label }}">Responsible</label>
+        {{ filter_form.responsible }}
+    </div>
+    <button type="submit">Filter</button>
+    <a href="{% url 'projects:list' %}">Clear</a>
+</form>
+
+{% if projects %}
+    <table>
+        <thead>
+            <tr>
+                <th>Project</th>
+                <th>Client</th>
+                <th>Status</th>
+                <th>Responsible</th>
+                <th>Assignments</th>
+                <th>Notes</th>
+                <th>Updated</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+                <tr>
+                    <td>{{ project.name }}</td>
+                    <td>{{ project.client }}</td>
+                    <td>{{ project.get_status_display }}</td>
+                    <td>{{ project.responsible|default:"—" }}</td>
+                    <td>{{ project.active_assignments_count }}</td>
+                    <td>{{ project.notes_count }}</td>
+                    <td>{{ project.updated_at }}</td>
+                    <td><a href="{% url 'projects:detail' project.pk %}">View</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if is_paginated %}
+        <div style="margin-top: 1rem;">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Next</a>
+            {% endif %}
+        </div>
+    {% endif %}
+{% else %}
+    <p>No projects found.</p>
+{% endif %}
+{% endblock %}

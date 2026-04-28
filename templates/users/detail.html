@@ -1,34 +1,113 @@
 {% extends "base.html" %}
+
+{% block title %}User Details | CRM Construction{% endblock %}
+
 {% block content %}
-  <h1>Detalle de usuario</h1>
+<div class="crm-page-shell">
 
-  <p><strong>Usuario:</strong> {{ managed_user.username }}</p>
-  <p><strong>Nombre:</strong> {{ managed_user.full_name }}</p>
-  <p><strong>Correo:</strong> {{ managed_user.email }}</p>
-  <p><strong>Teléfono:</strong> {{ managed_user.phone|default:"-" }}</p>
-  <p><strong>Cargo:</strong> {{ managed_user.job_title|default:"-" }}</p>
-  <p><strong>Estado:</strong> {% if managed_user.is_active %}Activo{% else %}Inactivo{% endif %}</p>
-  <p><strong>Roles:</strong>
-    {% for group in managed_user.groups.all %}
-      {{ group.name }}{% if not forloop.last %}, {% endif %}
-    {% empty %}
-      Sin roles asignados
-    {% endfor %}
-  </p>
+    <div class="crm-page-header">
+        <div class="crm-page-header__content">
+            <p class="crm-page-header__eyebrow">User Details</p>
+            <h1 class="crm-page-header__title">{{ managed_user.full_name }}</h1>
+            <p class="crm-page-header__description">Review account information, role assignment, and current status.</p>
+        </div>
 
-  <p>
-    <a href="{% url 'users:update' managed_user.pk %}">Editar</a>
-  </p>
+        <div class="crm-page-header__actions">
+            <a href="{% url 'users:update' managed_user.pk %}" class="crm-btn crm-btn--primary">Edit User</a>
+            <a href="{% url 'users:list' %}" class="crm-btn crm-btn--outline">Back to Users</a>
+        </div>
+    </div>
 
-  {% if managed_user.is_active %}
-    <form method="post" action="{% url 'users:deactivate' managed_user.pk %}">
-      {% csrf_token %}
-      <button type="submit">Desactivar usuario</button>
-    </form>
-  {% else %}
-    <form method="post" action="{% url 'users:activate' managed_user.pk %}">
-      {% csrf_token %}
-      <button type="submit">Activar usuario</button>
-    </form>
-  {% endif %}
+    <section class="crm-grid crm-grid--3">
+        <article class="crm-card crm-span-2">
+            <div class="crm-card__header">
+                <div>
+                    <h2 class="crm-card__title">Account Information</h2>
+                    <p class="crm-card__subtitle">Main user data registered in the CRM.</p>
+                </div>
+            </div>
+
+            <div class="crm-card__body">
+                <div class="crm-detail-grid">
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">Username</span>
+                        <span class="crm-detail-value">{{ managed_user.username }}</span>
+                    </div>
+
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">Full Name</span>
+                        <span class="crm-detail-value">{{ managed_user.full_name }}</span>
+                    </div>
+
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">Email Address</span>
+                        <span class="crm-detail-value">{{ managed_user.email }}</span>
+                    </div>
+
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">Phone</span>
+                        <span class="crm-detail-value">{{ managed_user.phone|default:"-" }}</span>
+                    </div>
+
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">Job Title</span>
+                        <span class="crm-detail-value">{{ managed_user.job_title|default:"-" }}</span>
+                    </div>
+
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">Status</span>
+                        <span class="crm-detail-value">
+                            {% if managed_user.is_active %}
+                                <span class="crm-status crm-status--active">Active</span>
+                            {% else %}
+                                <span class="crm-status crm-status--inactive">Inactive</span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="crm-detail-item crm-detail-item--full">
+                        <span class="crm-detail-label">Roles</span>
+                        <span class="crm-detail-value">
+                            <span class="crm-actions">
+                                {% for group in managed_user.groups.all %}
+                                    <span class="crm-badge crm-badge--info">{{ group.name }}</span>
+                                {% empty %}
+                                    <span class="crm-badge crm-badge--muted">No roles</span>
+                                {% endfor %}
+                            </span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <aside class="crm-card">
+            <div class="crm-card__header">
+                <div>
+                    <h2 class="crm-card__title">Quick Actions</h2>
+                    <p class="crm-card__subtitle">Manage this account.</p>
+                </div>
+            </div>
+
+            <div class="crm-card__body">
+                <div class="crm-actions">
+                    {% if managed_user.is_active %}
+                        <form method="post" action="{% url 'users:deactivate' managed_user.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="crm-btn crm-btn--danger crm-btn--full">Deactivate User</button>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{% url 'users:activate' managed_user.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="crm-btn crm-btn--success crm-btn--full">Activate User</button>
+                        </form>
+                    {% endif %}
+
+                    <a href="{% url 'users:list' %}" class="crm-btn crm-btn--outline crm-btn--full">Back to List</a>
+                </div>
+            </div>
+        </aside>
+    </section>
+
+</div>
 {% endblock %}

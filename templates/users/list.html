@@ -1,52 +1,204 @@
 {% extends "base.html" %}
+
+{% block title %}Users | CRM Construction{% endblock %}
+
 {% block content %}
-  <h1>Usuarios</h1>
+<div class="crm-page-shell">
 
-  <p>
-    <a href="{% url 'users:create' %}">Crear usuario</a> |
-    <a href="{% url 'users:role_list' %}">Gestionar roles</a> |
-    <a href="{% url 'users:access_log_list' %}">Ver accesos</a>
-  </p>
+    <div class="crm-page-header">
+        <div class="crm-page-header__content">
+            <p class="crm-page-header__eyebrow">Administration</p>
+            <h1 class="crm-page-header__title">System Users</h1>
+            <p class="crm-page-header__description">Manage user accounts, roles, permissions, and account status.</p>
+        </div>
 
-  <form method="get">
-    <input type="text" name="search" placeholder="Buscar usuario" value="{{ search }}">
-    <select name="is_active">
-      <option value="">Todos</option>
-      <option value="true" {% if selected_is_active == 'true' %}selected{% endif %}>Activos</option>
-      <option value="false" {% if selected_is_active == 'false' %}selected{% endif %}>Inactivos</option>
-    </select>
-    <select name="group">
-      <option value="">Todos los roles</option>
-      {% for role in roles %}
-        <option value="{{ role.name }}" {% if selected_group == role.name %}selected{% endif %}>
-          {{ role.name }}
-        </option>
-      {% endfor %}
-    </select>
-    <button type="submit">Filtrar</button>
-  </form>
-
-  <ul>
-    {% for user in users %}
-      <li>
-        <a href="{% url 'users:detail' user.pk %}">{{ user.full_name }}</a>
-        - {{ user.email }}
-        - {% if user.is_active %}Activo{% else %}Inactivo{% endif %}
-      </li>
-    {% empty %}
-      <li>No hay usuarios.</li>
-    {% endfor %}
-  </ul>
-
-  {% if is_paginated %}
-    <div>
-      {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
-      {% endif %}
-      <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-      {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
-      {% endif %}
+        <div class="crm-page-header__actions">
+            <a href="{% url 'users:create' %}" class="crm-btn crm-btn--primary">New User</a>
+            <a href="{% url 'users:role_list' %}" class="crm-btn crm-btn--outline">Roles</a>
+            <a href="{% url 'users:access_log_list' %}" class="crm-btn crm-btn--outline">Access Logs</a>
+        </div>
     </div>
-  {% endif %}
+
+    <section class="crm-filter-card">
+        <form method="get" class="crm-filter-form">
+            <div class="crm-form-field">
+                <label class="crm-form-label">Search</label>
+                <input type="text" name="search" placeholder="Search user..." value="{{ search }}">
+            </div>
+
+            <div class="crm-form-field">
+                <label class="crm-form-label">Status</label>
+                <select name="is_active">
+                    <option value="">All users</option>
+                    <option value="true" {% if selected_is_active == 'true' %}selected{% endif %}>Active</option>
+                    <option value="false" {% if selected_is_active == 'false' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+
+            <div class="crm-form-field">
+                <label class="crm-form-label">Role</label>
+                <select name="group">
+                    <option value="">All roles</option>
+                    {% for role in roles %}
+                        <option value="{{ role.name }}" {% if selected_group == role.name %}selected{% endif %}>
+                            {{ role.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="crm-filter-actions">
+                <button type="submit" class="crm-btn crm-btn--primary">Apply Filters</button>
+                <a href="{% url 'users:list' %}" class="crm-btn crm-btn--outline">Reset</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="crm-table-card is-mobile-cards">
+        <div class="crm-table-toolbar">
+            <h2 class="crm-table-toolbar__title">Registered Users</h2>
+        </div>
+
+        <div class="crm-table-wrap">
+            <table class="crm-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Roles</th>
+                        <th>Status</th>
+                        <th class="crm-hide-mobile">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'users:detail' user.pk %}" class="crm-table__primary">{{ user.full_name }}</a>
+                                <div class="crm-table__secondary">@{{ user.username }}</div>
+                            </td>
+
+                            <td>{{ user.email }}</td>
+
+                            <td>
+                                <div class="crm-actions">
+                                    {% for group in user.groups.all %}
+                                        <span class="crm-badge crm-badge--info">{{ group.name }}</span>
+                                    {% empty %}
+                                        <span class="crm-badge crm-badge--muted">No role</span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+
+                            <td>
+                                {% if user.is_active %}
+                                    <span class="crm-status crm-status--active">Active</span>
+                                {% else %}
+                                    <span class="crm-status crm-status--inactive">Inactive</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <div class="crm-row-actions">
+                                    <a href="{% url 'users:detail' user.pk %}" class="crm-btn crm-btn--sm crm-btn--outline">View</a>
+                                    <a href="{% url 'users:update' user.pk %}" class="crm-btn crm-btn--sm crm-btn--outline">Edit</a>
+
+                                    {% if user.is_active %}
+                                        <form method="post" action="{% url 'users:deactivate' user.pk %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="crm-btn crm-btn--sm crm-btn--danger">Deactivate</button>
+                                        </form>
+                                    {% else %}
+                                        <form method="post" action="{% url 'users:activate' user.pk %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="crm-btn crm-btn--sm crm-btn--success">Activate</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5">
+                                {% include "includes/empty_state.html" with title="No users found" description="There are no users matching your current filters." %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="crm-mobile-card-list">
+            {% for user in users %}
+                <article class="crm-mobile-card">
+                    <div class="crm-mobile-card__header">
+                        <div>
+                            <h2 class="crm-mobile-card__title">{{ user.full_name }}</h2>
+                            <p class="crm-mobile-card__subtitle">@{{ user.username }}</p>
+                        </div>
+
+                        {% if user.is_active %}
+                            <span class="crm-status crm-status--active">Active</span>
+                        {% else %}
+                            <span class="crm-status crm-status--inactive">Inactive</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="crm-mobile-card__meta">
+                        <div class="crm-mobile-card__meta-row">
+                            <span class="crm-mobile-card__label">Email</span>
+                            <span class="crm-mobile-card__value">{{ user.email }}</span>
+                        </div>
+
+                        <div class="crm-mobile-card__meta-row">
+                            <span class="crm-mobile-card__label">Roles</span>
+                            <span class="crm-mobile-card__value">
+                                {% for group in user.groups.all %}
+                                    {{ group.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    No role
+                                {% endfor %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="crm-mobile-card__actions">
+                        <a href="{% url 'users:detail' user.pk %}" class="crm-btn crm-btn--outline">View</a>
+                        <a href="{% url 'users:update' user.pk %}" class="crm-btn crm-btn--outline">Edit</a>
+
+                        {% if user.is_active %}
+                            <form method="post" action="{% url 'users:deactivate' user.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="crm-btn crm-btn--danger crm-btn--full">Deactivate</button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{% url 'users:activate' user.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="crm-btn crm-btn--success crm-btn--full">Activate</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    {% if is_paginated %}
+        <nav class="crm-pagination" aria-label="Pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_is_active %}&is_active={{ selected_is_active }}{% endif %}{% if selected_group %}&group={{ selected_group }}{% endif %}" class="crm-pagination__link">Previous</a>
+            {% endif %}
+
+            <span class="crm-pagination__current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_is_active %}&is_active={{ selected_is_active }}{% endif %}{% if selected_group %}&group={{ selected_group }}{% endif %}" class="crm-pagination__link">Next</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+
+</div>
 {% endblock %}

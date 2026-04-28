@@ -1,0 +1,9 @@
+{% if is_two_hours_before %}
+Technical visit in 2 hours - {{ visit.title }}
+{% elif is_same_day %}
+Technical visit reminder for today - {{ visit.title }}
+{% elif is_day_before %}
+Technical visit reminder for tomorrow - {{ visit.title }}
+{% else %}
+Technical visit reminder- {{ visit.title }}
+{% endif %}

@@ -1,7 +1,9 @@
 {% if messages %}
-    <ul>
+    <div class="crm-messages" role="status" aria-live="polite">
         {% for message in messages %}
-            <li>{{ message }}</li>
+            <div class="crm-alert crm-alert--{{ message.tags }}">
+                {{ message }}
+            </div>
         {% endfor %}
-    </ul>
+    </div>
 {% endif %}

@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Billing Accounts{% endblock %}
+
+{% block extra_css %}
+<style>
+  .billing-wrap {
+    padding: 32px 0;
+  }
+
+  .billing-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .billing-title h1 {
+    margin: 0;
+    color: #ffffff;
+  }
+
+  .billing-title p {
+    color: #b0b0b0;
+    margin: 6px 0 0;
+  }
+
+  .billing-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .billing-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    border: 1px solid #0077ff;
+    color: #ffffff;
+    background: #0055ff;
+    font-weight: 700;
+  }
+
+  .billing-btn.secondary {
+    background: #121212;
+    color: #ffffff;
+  }
+
+  .billing-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .billing-card {
+    background: #121212;
+    border: 1px solid #0077ff;
+    border-radius: 16px;
+    padding: 18px;
+  }
+
+  .billing-card span {
+    display: block;
+    color: #b0b0b0;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .billing-card strong {
+    color: #ffffff;
+    font-size: 24px;
+  }
+
+  .billing-filter {
+    background: #121212;
+    border: 1px solid #1a1a1a;
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 24px;
+  }
+
+  .billing-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .billing-filter label {
+    color: #b0b0b0;
+    font-size: 13px;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .billing-filter input,
+  .billing-filter select {
+    width: 100%;
+    background: #050505;
+    border: 1px solid #1a1a1a;
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .billing-table-wrap {
+    overflow-x: auto;
+    background: #121212;
+    border-radius: 16px;
+    border: 1px solid #1a1a1a;
+  }
+
+  .billing-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+  }
+
+  .billing-table th,
+  .billing-table td {
+    padding: 14px;
+    border-bottom: 1px solid #1a1a1a;
+    text-align: left;
+  }
+
+  .billing-table th {
+    color: #ffffff;
+    background: #050505;
+  }
+
+  .billing-table td {
+    color: #b0b0b0;
+  }
+
+  .billing-table a {
+    color: #00a3ff;
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .billing-status {
+    display: inline-flex;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #002277;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  @media (max-width: 900px) {
+    .billing-summary {
+      grid-template-columns: 1fr;
+    }
+
+    .billing-filter-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="billing-wrap">
+  <div class="billing-header">
+    <div class="billing-title">
+      <h1>Billing Accounts</h1>
+      <p>Accounts receivable, balances, payments and pending collections.</p>
+    </div>
+
+    <div class="billing-actions">
+      <a href="{% url 'billing:pending' %}" class="billing-btn secondary">Pending accounts</a>
+      <a href="{% url 'billing:create' %}" class="billing-btn">Create account</a>
+    </div>
+  </div>
+
+  <div class="billing-summary">
+    <div class="billing-card">
+      <span>Total pending</span>
+      <strong>${{ summary.total_pending }}</strong>
+    </div>
+    <div class="billing-card">
+      <span>Total paid</span>
+      <strong>${{ summary.total_paid }}</strong>
+    </div>
+    <div class="billing-card">
+      <span>Overdue accounts</span>
+      <strong>{{ summary.overdue_count }}</strong>
+    </div>
+  </div>
+
+  <form method="get" class="billing-filter">
+    <div class="billing-filter-grid">
+      <div>
+        <label>Search</label>
+        {{ filter_form.search }}
+      </div>
+      <div>
+        <label>Status</label>
+        {{ filter_form.status }}
+      </div>
+      <div>
+        <label>Client</label>
+        {{ filter_form.client }}
+      </div>
+      <div>
+        <label>Project</label>
+        {{ filter_form.project }}
+      </div>
+      <div>
+        <label>Due from</label>
+        {{ filter_form.due_from }}
+      </div>
+      <div>
+        <label>Due to</label>
+        {{ filter_form.due_to }}
+      </div>
+      <div>
+        <label>Only overdue</label>
+        {{ filter_form.only_overdue }}
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="submit" class="billing-btn">Filter</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="billing-table-wrap">
+    <table class="billing-table">
+      <thead>
+        <tr>
+          <th>Account</th>
+          <th>Client</th>
+          <th>Project</th>
+          <th>Total</th>
+          <th>Paid</th>
+          <th>Balance</th>
+          <th>Status</th>
+          <th>Due date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for account in accounts %}
+          <tr>
+            <td>
+              <a href="{{ account.get_absolute_url }}">{{ account.title }}</a>
+              {% if account.invoice_number %}
+                <br><small>Invoice: {{ account.invoice_number }}</small>
+              {% endif %}
+            </td>
+            <td>{{ account.client }}</td>
+            <td>{{ account.project|default:"—" }}</td>
+            <td>${{ account.total_amount }}</td>
+            <td>${{ account.amount_paid }}</td>
+            <td>${{ account.balance_due }}</td>
+            <td><span class="billing-status">{{ account.get_status_display }}</span></td>
+            <td>{{ account.due_date|default:"—" }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="8">No billing accounts found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

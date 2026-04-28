@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views
 
 from .views import (
     AccessDeniedView,
@@ -20,7 +21,8 @@ app_name = "users"
 urlpatterns = [
     path("", UserListView.as_view(), name="list"),
     path("create/", UserCreateView.as_view(), name="create"),
-    path("profile/", ProfileView.as_view(), name="profile"),
+    path('profile/', ProfileView.as_view(), name='profile'),
+    path('list/', views.UserListView.as_view(), name='list'),
     path("roles/", RoleListView.as_view(), name="role_list"),
     path("roles/create/", RoleCreateView.as_view(), name="role_create"),
     path("roles/<int:pk>/edit/", RoleUpdateView.as_view(), name="role_update"),

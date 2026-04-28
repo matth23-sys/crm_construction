@@ -1,0 +1,426 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --dl-bg: #050505;
+    --dl-surface: #121212;
+    --dl-surface-2: #1A1A1A;
+    --dl-highlight: #00A3FF;
+    --dl-primary: #0055FF;
+    --dl-secondary: #002277;
+    --dl-border: #0077FF;
+    --dl-text: #FFFFFF;
+    --dl-text-muted: #B0B0B0;
+    --dl-shadow: 0 14px 40px rgba(0, 85, 255, 0.18);
+    --dl-radius: 18px;
+    --dl-radius-sm: 12px;
+    --dl-transition: 220ms ease;
+  }
+
+  .ma-page {
+    background:
+      radial-gradient(circle at top right, rgba(0, 163, 255, 0.12), transparent 26%),
+      radial-gradient(circle at top left, rgba(0, 85, 255, 0.10), transparent 22%),
+      var(--dl-bg);
+    color: var(--dl-text);
+    min-height: 100vh;
+    padding: 2rem 0 3rem;
+  }
+
+  .ma-container {
+    width: min(1280px, calc(100% - 2rem));
+    margin: 0 auto;
+  }
+
+  .ma-hero,
+  .ma-panel,
+  .ma-filter,
+  .ma-card {
+    background: linear-gradient(180deg, rgba(26,26,26,.96), rgba(18,18,18,.98));
+    border: 1px solid rgba(0, 119, 255, 0.28);
+    border-radius: var(--dl-radius);
+    box-shadow: var(--dl-shadow);
+  }
+
+  .ma-hero {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1.25rem;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .ma-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .45rem .8rem;
+    border-radius: 999px;
+    background: rgba(0, 163, 255, 0.10);
+    border: 1px solid rgba(0, 163, 255, 0.22);
+    color: var(--dl-highlight);
+    font-size: .82rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .ma-title {
+    margin: .85rem 0 .5rem;
+    font-size: clamp(1.8rem, 3vw, 2.65rem);
+    line-height: 1.05;
+    color: var(--dl-text);
+  }
+
+  .ma-subtext {
+    margin: 0;
+    color: var(--dl-text-muted);
+    line-height: 1.7;
+  }
+
+  .ma-subtext a {
+    color: var(--dl-highlight);
+    text-decoration: none;
+  }
+
+  .ma-actions {
+    display: flex;
+    gap: .85rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .ma-btn,
+  .ma-btn-secondary,
+  .ma-link-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    min-height: 46px;
+    padding: .85rem 1.15rem;
+    border-radius: 999px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform var(--dl-transition), box-shadow var(--dl-transition), background var(--dl-transition), border-color var(--dl-transition);
+    cursor: pointer;
+  }
+
+  .ma-btn {
+    background: linear-gradient(135deg, var(--dl-highlight), var(--dl-primary));
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: 0 10px 24px rgba(0, 163, 255, 0.24);
+  }
+
+  .ma-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(0, 163, 255, 0.30);
+  }
+
+  .ma-btn-secondary,
+  .ma-link-btn {
+    background: rgba(0, 85, 255, 0.10);
+    color: var(--dl-text);
+    border: 1px solid rgba(0, 119, 255, 0.30);
+  }
+
+  .ma-btn-secondary:hover,
+  .ma-link-btn:hover {
+    background: rgba(0, 85, 255, 0.18);
+    transform: translateY(-2px);
+  }
+
+  .ma-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .ma-panel {
+    padding: 1.1rem 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ma-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--dl-highlight), var(--dl-primary), transparent);
+  }
+
+  .ma-panel-label {
+    color: var(--dl-text-muted);
+    font-size: .88rem;
+    margin-bottom: .4rem;
+  }
+
+  .ma-panel-value {
+    font-size: clamp(1.5rem, 2vw, 2rem);
+    font-weight: 800;
+    color: var(--dl-text);
+  }
+
+  .ma-panel-value--before {
+    color: var(--dl-highlight);
+  }
+
+  .ma-panel-value--progress {
+    color: #7cb5ff;
+  }
+
+  .ma-panel-value--final {
+    color: #4fd1ff;
+  }
+
+  .ma-filter {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .ma-filter-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .ma-field label {
+    display: block;
+    margin-bottom: .45rem;
+    font-weight: 600;
+    color: var(--dl-text);
+  }
+
+  .ma-field input,
+  .ma-field select,
+  .ma-field textarea {
+    width: 100%;
+    min-height: 46px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 119, 255, 0.24);
+    background: #0D0D0D;
+    color: var(--dl-text);
+    padding: .8rem .9rem;
+    outline: none;
+    transition: border-color var(--dl-transition), box-shadow var(--dl-transition);
+  }
+
+  .ma-field textarea {
+    min-height: 140px;
+    resize: vertical;
+  }
+
+  .ma-field input:focus,
+  .ma-field select:focus,
+  .ma-field textarea:focus {
+    border-color: var(--dl-highlight);
+    box-shadow: 0 0 0 3px rgba(0, 163, 255, 0.14);
+  }
+
+  .ma-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .ma-card {
+    overflow: hidden;
+    transition: transform var(--dl-transition), box-shadow var(--dl-transition), border-color var(--dl-transition);
+  }
+
+  .ma-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0, 163, 255, 0.40);
+    box-shadow: 0 18px 38px rgba(0, 85, 255, 0.22);
+  }
+
+  .ma-card-image-link {
+    display: block;
+    background: #0B0B0B;
+  }
+
+  .ma-card-image {
+    width: 100%;
+    height: 220px;
+    display: block;
+    object-fit: cover;
+  }
+
+  .ma-card-body {
+    padding: 1rem;
+  }
+
+  .ma-card-top {
+    display: flex;
+    justify-content: space-between;
+    gap: .75rem;
+    align-items: center;
+    margin-bottom: .65rem;
+  }
+
+  .ma-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: .38rem .7rem;
+    font-size: .78rem;
+    font-weight: 700;
+    border: 1px solid rgba(0, 119, 255, 0.24);
+    background: rgba(0, 85, 255, 0.10);
+    color: var(--dl-highlight);
+  }
+
+  .ma-card-date {
+    font-size: .82rem;
+    color: var(--dl-text-muted);
+  }
+
+  .ma-card-title {
+    margin: 0 0 .5rem;
+    font-size: 1rem;
+    color: var(--dl-text);
+  }
+
+  .ma-card-description {
+    margin: 0;
+    color: var(--dl-text-muted);
+    line-height: 1.65;
+  }
+
+  .ma-card-footer {
+    margin-top: .95rem;
+  }
+
+  .ma-card-footer a {
+    color: var(--dl-highlight);
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .ma-empty {
+    padding: 2rem;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(26,26,26,.96), rgba(18,18,18,.98));
+    border: 1px dashed rgba(0, 119, 255, 0.30);
+    border-radius: var(--dl-radius);
+    color: var(--dl-text-muted);
+  }
+
+  @media (max-width: 900px) {
+    .ma-stats {
+      grid-template-columns: 1fr;
+    }
+
+    .ma-filter-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="ma-page">
+  <div class="ma-container">
+    <div class="ma-hero">
+      <div>
+        <span class="ma-kicker">Media Assets</span>
+        <h1 class="ma-title">Project gallery</h1>
+        <p class="ma-subtext">
+          <strong>Project:</strong> {{ project.name }}<br>
+          <strong>Client:</strong> {{ project.client }}<br>
+          <strong>Location:</strong> {{ project.location|default:"—" }}
+        </p>
+      </div>
+
+      <div class="ma-actions">
+        {% if can_upload %}
+          <a class="ma-btn" href="{% url 'media_assets:photo_upload' project_id=project.id %}">
+            Upload photo
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="ma-stats">
+      <div class="ma-panel">
+        <div class="ma-panel-label">Before</div>
+        <div class="ma-panel-value ma-panel-value--before">{{ classification_counts.before }}</div>
+      </div>
+      <div class="ma-panel">
+        <div class="ma-panel-label">In progress</div>
+        <div class="ma-panel-value ma-panel-value--progress">{{ classification_counts.in_progress }}</div>
+      </div>
+      <div class="ma-panel">
+        <div class="ma-panel-label">Final</div>
+        <div class="ma-panel-value ma-panel-value--final">{{ classification_counts.final }}</div>
+      </div>
+    </div>
+
+    <div class="ma-filter">
+      <form method="get">
+        <div class="ma-filter-grid">
+          <div class="ma-field">
+            <label for="{{ filter_form.q.id_for_label }}">Search</label>
+            {{ filter_form.q }}
+          </div>
+
+          <div class="ma-field">
+            <label for="{{ filter_form.classification.id_for_label }}">Classification</label>
+            {{ filter_form.classification }}
+          </div>
+
+          <div>
+            <button type="submit" class="ma-btn-secondary" style="width:100%;">Filter</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    {% if photos %}
+      <div class="ma-grid">
+        {% for photo in photos %}
+          <article class="ma-card">
+            <a class="ma-card-image-link" href="{% url 'media_assets:photo_detail' pk=photo.id %}">
+              <img
+                class="ma-card-image"
+                src="{{ photo.image.url }}"
+                alt="{{ photo.title|default:photo.filename }}"
+              >
+            </a>
+
+            <div class="ma-card-body">
+              <div class="ma-card-top">
+                <span class="ma-badge">{{ photo.get_classification_display }}</span>
+                <span class="ma-card-date">{{ photo.created_at|date:"Y-m-d H:i" }}</span>
+              </div>
+
+              <h3 class="ma-card-title">{{ photo.title|default:"Untitled photo" }}</h3>
+
+              {% if photo.description %}
+                <p class="ma-card-description">{{ photo.description|truncatechars:100 }}</p>
+              {% else %}
+                <p class="ma-card-description">No description added for this image.</p>
+              {% endif %}
+
+              <div class="ma-card-footer">
+                <a href="{% url 'media_assets:photo_detail' pk=photo.id %}">View detail</a>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="ma-empty">
+        <p>No photos found for this project.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

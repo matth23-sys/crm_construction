@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --dl-bg: #050505;
+    --dl-surface: #121212;
+    --dl-surface-2: #1A1A1A;
+    --dl-highlight: #00A3FF;
+    --dl-primary: #0055FF;
+    --dl-secondary: #002277;
+    --dl-border: #0077FF;
+    --dl-text: #FFFFFF;
+    --dl-text-muted: #B0B0B0;
+    --dl-shadow: 0 14px 40px rgba(0, 85, 255, 0.18);
+    --dl-radius: 18px;
+    --dl-transition: 220ms ease;
+  }
+
+  .mad-page {
+    min-height: 100vh;
+    padding: 2rem 0 3rem;
+    background:
+      radial-gradient(circle at top right, rgba(0, 163, 255, 0.10), transparent 26%),
+      radial-gradient(circle at left center, rgba(0, 34, 119, 0.16), transparent 30%),
+      var(--dl-bg);
+    color: var(--dl-text);
+  }
+
+  .mad-container {
+    width: min(1200px, calc(100% - 2rem));
+    margin: 0 auto;
+  }
+
+  .mad-hero,
+  .mad-meta-card {
+    background: linear-gradient(180deg, rgba(26,26,26,.98), rgba(18,18,18,.98));
+    border: 1px solid rgba(0, 119, 255, 0.28);
+    border-radius: var(--dl-radius);
+    box-shadow: var(--dl-shadow);
+  }
+
+  .mad-hero {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 1.4rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .mad-kicker {
+    display: inline-flex;
+    padding: .42rem .8rem;
+    border-radius: 999px;
+    background: rgba(0, 163, 255, 0.10);
+    border: 1px solid rgba(0, 163, 255, 0.22);
+    color: var(--dl-highlight);
+    font-size: .8rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .mad-title {
+    margin: .85rem 0 .5rem;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    line-height: 1.06;
+    color: var(--dl-text);
+  }
+
+  .mad-info {
+    margin: 0;
+    color: var(--dl-text-muted);
+    line-height: 1.7;
+  }
+
+  .mad-actions {
+    display: flex;
+    gap: .85rem;
+    flex-wrap: wrap;
+  }
+
+  .mad-btn,
+  .mad-btn-secondary,
+  .mad-btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    padding: .85rem 1.15rem;
+    border-radius: 999px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform var(--dl-transition), box-shadow var(--dl-transition), background var(--dl-transition);
+    cursor: pointer;
+  }
+
+  .mad-btn {
+    background: linear-gradient(135deg, var(--dl-highlight), var(--dl-primary));
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: 0 10px 24px rgba(0, 163, 255, 0.24);
+  }
+
+  .mad-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(0, 163, 255, 0.30);
+  }
+
+  .mad-btn-secondary {
+    background: rgba(0, 85, 255, 0.10);
+    color: var(--dl-text);
+    border: 1px solid rgba(0, 119, 255, 0.30);
+  }
+
+  .mad-btn-secondary:hover {
+    background: rgba(0, 85, 255, 0.18);
+    transform: translateY(-2px);
+  }
+
+  .mad-btn-danger {
+    background: linear-gradient(135deg, #0f315a, #002277);
+    color: #fff;
+    border: 1px solid rgba(0, 119, 255, 0.30);
+  }
+
+  .mad-btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(0, 34, 119, 0.32);
+  }
+
+  .mad-grid {
+    display: grid;
+    grid-template-columns: minmax(320px, 1.45fr) minmax(280px, 0.95fr);
+    gap: 1.5rem;
+  }
+
+  .mad-image-wrap {
+    background: linear-gradient(180deg, rgba(26,26,26,.98), rgba(18,18,18,.98));
+    border: 1px solid rgba(0, 119, 255, 0.28);
+    border-radius: var(--dl-radius);
+    box-shadow: var(--dl-shadow);
+    padding: 1rem;
+  }
+
+  .mad-image {
+    width: 100%;
+    display: block;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 119, 255, 0.18);
+    object-fit: cover;
+    background: #0A0A0A;
+  }
+
+  .mad-meta-card {
+    padding: 1.2rem;
+  }
+
+  .mad-meta-title {
+    margin: 0 0 1rem;
+    font-size: 1.15rem;
+    color: var(--dl-text);
+  }
+
+  .mad-meta-list {
+    display: grid;
+    gap: .85rem;
+  }
+
+  .mad-meta-item {
+    padding: .85rem .95rem;
+    background: rgba(0, 85, 255, 0.07);
+    border: 1px solid rgba(0, 119, 255, 0.16);
+    border-radius: 12px;
+  }
+
+  .mad-meta-label {
+    display: block;
+    font-size: .8rem;
+    color: var(--dl-text-muted);
+    margin-bottom: .24rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+
+  .mad-meta-value {
+    color: var(--dl-text);
+    line-height: 1.55;
+    word-break: break-word;
+  }
+
+  .mad-delete-form {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 119, 255, 0.18);
+  }
+
+  @media (max-width: 960px) {
+    .mad-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="mad-page">
+  <div class="mad-container">
+    <div class="mad-hero">
+      <div>
+        <span class="mad-kicker">Media Assets</span>
+        <h1 class="mad-title">Photo detail</h1>
+        <p class="mad-info">
+          <strong>Project:</strong>
+          <a href="{% url 'media_assets:project_gallery' project_id=project.id %}" style="color:#00A3FF;text-decoration:none;">
+            {{ project.name }}
+          </a><br>
+          <strong>Client:</strong> {{ project.client }}<br>
+          <strong>Classification:</strong> {{ photo.get_classification_display }}
+        </p>
+      </div>
+
+      <div class="mad-actions">
+        {% if can_replace %}
+          <a class="mad-btn" href="{% url 'media_assets:photo_replace' pk=photo.id %}">
+            Replace photo
+          </a>
+        {% endif %}
+        <a class="mad-btn-secondary" href="{% url 'media_assets:project_gallery' project_id=project.id %}">
+          Back to gallery
+        </a>
+      </div>
+    </div>
+
+    <div class="mad-grid">
+      <div class="mad-image-wrap">
+        <img
+          class="mad-image"
+          src="{{ photo.image.url }}"
+          alt="{{ photo.title|default:photo.filename }}"
+        >
+      </div>
+
+      <aside class="mad-meta-card">
+        <h3 class="mad-meta-title">Metadata</h3>
+
+        <div class="mad-meta-list">
+          <div class="mad-meta-item">
+            <span class="mad-meta-label">Title</span>
+            <div class="mad-meta-value">{{ photo.title|default:"—" }}</div>
+          </div>
+
+          <div class="mad-meta-item">
+            <span class="mad-meta-label">Description</span>
+            <div class="mad-meta-value">{{ photo.description|default:"—" }}</div>
+          </div>
+
+          <div class="mad-meta-item">
+            <span class="mad-meta-label">Original filename</span>
+            <div class="mad-meta-value">{{ photo.original_filename|default:"—" }}</div>
+          </div>
+
+          <div class="mad-meta-item">
+            <span class="mad-meta-label">MIME type</span>
+            <div class="mad-meta-value">{{ photo.mime_type|default:"—" }}</div>
+          </div>
+
+          <div class="mad-meta-item">
+            <span class="mad-meta-label">Size</span>
+            <div class="mad-meta-value">{{ photo.file_size }} bytes</div>
+          </div>
+
+          <div class="mad-meta-item">
+            <span class="mad-meta-label">Taken at</span>
+            <div class="mad-meta-value">{{ photo.taken_at|date:"Y-m-d H:i"|default:"—" }}</div>
+          </div>
+
+          <div class="mad-meta-item">
+            <span class="mad-meta-label">Uploaded by</span>
+            <div class="mad-meta-value">{{ photo.created_by|default:"—" }}</div>
+          </div>
+
+          <div class="mad-meta-item">
+            <span class="mad-meta-label">Uploaded at</span>
+            <div class="mad-meta-value">{{ photo.created_at|date:"Y-m-d H:i" }}</div>
+          </div>
+        </div>
+
+        {% if can_delete %}
+          <div class="mad-delete-form">
+            <form method="post" action="{% url 'media_assets:photo_delete' pk=photo.id %}">
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="mad-btn-danger"
+                onclick="return confirm('Delete this photo permanently?');"
+              >
+                Delete photo
+              </button>
+            </form>
+          </div>
+        {% endif %}
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

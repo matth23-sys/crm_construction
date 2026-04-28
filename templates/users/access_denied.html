@@ -1,6 +1,15 @@
 {% extends "base.html" %}
+
+{% block title %}Acceso denegado | CRM Construction{% endblock %}
+
 {% block content %}
-  <h1>Acceso denegado</h1>
-  <p>No tienes permisos para entrar a esta sección.</p>
-  <p><a href="/dashboard/">Volver al dashboard</a></p>
+<div class="auth-container" style="min-height: auto; padding: 2rem;">
+    <div class="auth-card" style="max-width: 500px;">
+        <h2 class="auth-title">⛔ Acceso denegado</h2>
+        <p class="auth-subtitle">No tienes permisos para entrar a esta sección.</p>
+        <div class="text-center mt-4">
+            <a href="{% url 'dashboard_home' %}" class="btn btn-primary btn-electric">Volver al dashboard</a>
+        </div>
+    </div>
+</div>
 {% endblock %}

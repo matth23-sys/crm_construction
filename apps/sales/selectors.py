@@ -1,70 +1,67 @@
-from django.db.models import Count, Prefetch, Q
+# -*- coding: utf-8 -*-
+from django.db.models import Q, Prefetch
+from .models.entities import Opportunity, OpportunityStage, OpportunityStageHistory
+from .models.choices import OpportunityStatus
 
-from .models import Opportunity, OpportunityStage, OpportunityStatus
+def get_opportunity_list(filters=None, user=None):
+    """
+    Retorna queryset de oportunidades con optimizaciones.
+    Filtros opcionales: status, stage, responsible, client, search.
+    """
+    qs = Opportunity.objects.select_related(
+        'client', 'responsible', 'stage'          # ← CAMBIADO: 'current_stage' → 'stage'
+    ).prefetch_related(
+        Prefetch('stage_history', queryset=OpportunityStageHistory.objects.order_by('-created_at'))
+    ).all()
 
+    if not filters:
+        return qs
 
-def get_stage_queryset():
-    return OpportunityStage.objects.order_by("position", "name")
+    if 'status' in filters and filters['status']:
+        qs = qs.filter(status=filters['status'])
 
+    if 'stage' in filters and filters['stage']:
+        qs = qs.filter(stage_id=filters['stage'])   # ← CAMBIADO: current_stage_id → stage_id
 
-def get_opportunity_queryset():
+    if 'responsible' in filters and filters['responsible']:
+        qs = qs.filter(responsible_id=filters['responsible'])
+
+    if 'client' in filters and filters['client']:
+        qs = qs.filter(client_id=filters['client'])
+
+    if 'search' in filters and filters['search']:
+        search = filters['search']
+        qs = qs.filter(
+            Q(title__icontains=search) |
+            Q(client__legal_name__icontains=search) |
+            Q(client__commercial_name__icontains=search)
+        )
+
+    return qs
+
+def get_kanban_board(user=None):
+    """
+    Retorna un diccionario con etapas y sus oportunidades.
+    """
+    stages = OpportunityStage.objects.filter(is_active=True).order_by('position')  # ← CAMBIADO: 'order' → 'position'
+    opportunities = Opportunity.objects.filter(
+        status__in=[OpportunityStatus.OPEN, OpportunityStatus.WON, OpportunityStatus.LOST]
+    ).select_related('client', 'responsible', 'stage')   # ← CAMBIADO: 'current_stage' → 'stage'
+
+    board = {}
+    for stage in stages:
+        board[stage.id] = {
+            'stage': stage,
+            'opportunities': [opp for opp in opportunities if opp.stage_id == stage.id]  # ← CAMBIADO: current_stage_id → stage_id
+        }
+    return board
+
+def get_opportunity_detail(opportunity_id, user=None):
+    """
+    Retorna una oportunidad con todas las relaciones precargadas.
+    """
     return Opportunity.objects.select_related(
-        "client",
-        "stage",
-        "responsible",
-        "created_by",
-        "updated_by",
-    ).order_by("-created_at")
-
-
-def get_opportunity_detail_queryset():
-    return get_opportunity_queryset().prefetch_related(
-        Prefetch(
-            "stage_history",
-            queryset=(
-                Opportunity.stage_history.rel.related_model.objects.select_related(
-                    "from_stage",
-                    "to_stage",
-                    "changed_by",
-                ).order_by("-moved_at", "-created_at")
-            ),
-        )
-    )
-
-
-def get_kanban_stage_queryset(*, responsible=None, client=None, include_closed=False):
-    opportunity_filter = Q()
-    count_filter = Q()
-
-    if not include_closed:
-        opportunity_filter &= Q(status=OpportunityStatus.OPEN)
-        count_filter &= Q(opportunities__status=OpportunityStatus.OPEN)
-
-    if responsible is not None:
-        opportunity_filter &= Q(responsible=responsible)
-        count_filter &= Q(opportunities__responsible=responsible)
-
-    if client is not None:
-        opportunity_filter &= Q(client=client)
-        count_filter &= Q(opportunities__client=client)
-
-    filtered_opportunities = get_opportunity_queryset().filter(opportunity_filter)
-
-    return (
-        get_stage_queryset()
-        .filter(is_active=True)
-        .prefetch_related(
-            Prefetch(
-                "opportunities",
-                queryset=filtered_opportunities,
-                to_attr="kanban_opportunities",
-            )
-        )
-        .annotate(
-            kanban_opportunity_count=Count(
-                "opportunities",
-                filter=count_filter,
-                distinct=True,
-            )
-        )
-    )
+        'client', 'responsible', 'stage'      # ← CAMBIADO: 'current_stage' → 'stage'
+    ).prefetch_related(
+        Prefetch('stage_history', queryset=OpportunityStageHistory.objects.order_by('-created_at'))
+    ).get(pk=opportunity_id)

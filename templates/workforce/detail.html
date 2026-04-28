@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }} | CRM Construction{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h2 class="card-title">{{ project.name }}</h2>
+            <p class="text-muted mb-0">
+                Cliente: {{ project.client.commercial_name|default:project.client.legal_name }}<br>
+                Ubicación: {{ project.location|default:"—" }}<br>
+                <small>Ref: PRJ-{{ project.pk|stringformat:"s"|slice:":8"|upper }}</small>
+            </p>
+        </div>
+        <a href="{% url 'workforce:list' %}" class="btn btn-outline btn-sm">← Volver a mis proyectos</a>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-item">
+            <div class="detail-label">Estado</div>
+            <div class="detail-value">
+                <span class="badge badge-primary">{{ project.get_status_display|default:project.status }}</span>
+            </div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Responsable</div>
+            <div class="detail-value">{{ project.responsible|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Fecha inicio</div>
+            <div class="detail-value">{{ project.start_date|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Finalización esperada</div>
+            <div class="detail-value">{{ project.expected_end_date|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Descripción</div>
+            <div class="detail-value">{{ project.description|default:"—" }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Actualizaciones de campo</h3>
+    </div>
+    <form method="post" action="{% url 'workforce:note_create' project.pk %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="form-label" for="{{ field_note_form.body.id_for_label }}">{{ field_note_form.body.label }}</label>
+            {{ field_note_form.body }}
+            {% if field_note_form.body.errors %}
+                <div class="errorlist">{{ field_note_form.body.errors }}</div>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar nota</button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Notas de campo recientes</h3>
+    </div>
+    {% if field_notes %}
+        <ul class="log-list">
+            {% for note in field_notes %}
+                <li class="log-item">
+                    <div>
+                        <strong>{{ note.author }}</strong><br>
+                        <span class="text-muted small">{{ note.created_at }}</span>
+                    </div>
+                    <div>{{ note.body|linebreaksbr }}</div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">No hay notas aún.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Hitos permitidos</h3>
+    </div>
+    {% if milestone_form.fields.action.choices %}
+        <form method="post" action="{% url 'workforce:milestone_update' project.pk %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label" for="{{ milestone_form.action.id_for_label }}">{{ milestone_form.action.label }}</label>
+                {{ milestone_form.action }}
+                {% if milestone_form.action.errors %}
+                    <div class="errorlist">{{ milestone_form.action.errors }}</div>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn btn-outline">Actualizar hito</button>
+        </form>
+    {% else %}
+        <p class="text-muted">No hay acciones de hito disponibles para el estado actual del proyecto.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Equipo activo</h3>
+    </div>
+    {% if active_assignments %}
+        <ul class="log-list">
+            {% for assignment in active_assignments %}
+                <li class="log-item">
+                    <div><strong>{{ assignment.user }}</strong></div>
+                    <div class="text-muted">{{ assignment.role }}</div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">No hay asignaciones activas.</p>
+    {% endif %}
+</div>
+
+<a href="{% url 'media_assets:photo_upload' project_id=object.id %}">
+  Upload photo
+</a>
+{% endblock %}

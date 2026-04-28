@@ -1,14 +1,120 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard | CRM Construction{% endblock %}
 
 {% block content %}
-    <h2>Dashboard</h2>
-    <p>Base operativa inicial del CRM.</p>
-    <ul>
-        <li>Proyecto activo</li>
-        <li>Autenticación funcionando</li>
-        <li>Core base cargado</li>
-        <li>Listo para Fase 2</li>
-    </ul>
+<div class="crm-page-shell">
+
+    {% include "includes/page_header.html" with eyebrow="Dashboard" title="Operations Overview" description="Review clients, sales, projects, field work, visits, billing, and administration from one central workspace." %}
+
+    <section class="crm-grid crm-grid--auto">
+        {% if perms.clients.view_client %}
+            <article class="crm-stat-card">
+                <p class="crm-stat-card__label">Clients</p>
+                <h2 class="crm-stat-card__value">CRM</h2>
+                <p class="crm-stat-card__note">Manage client records and interaction history.</p>
+                <a href="/clients/" class="crm-btn crm-btn--secondary">Open Clients</a>
+            </article>
+        {% endif %}
+
+        {% if perms.sales.view_opportunity %}
+            <article class="crm-stat-card">
+                <p class="crm-stat-card__label">Sales</p>
+                <h2 class="crm-stat-card__value">Pipeline</h2>
+                <p class="crm-stat-card__note">Track opportunities, stages, and commercial progress.</p>
+                <a href="/sales/" class="crm-btn crm-btn--secondary">Open Sales</a>
+            </article>
+        {% endif %}
+
+        {% if perms.projects.view_project %}
+            <article class="crm-stat-card">
+                <p class="crm-stat-card__label">Projects</p>
+                <h2 class="crm-stat-card__value">Work</h2>
+                <p class="crm-stat-card__note">Review active jobs, assignments, and internal notes.</p>
+                <a href="/projects/" class="crm-btn crm-btn--secondary">Open Projects</a>
+            </article>
+        {% endif %}
+
+        {% if perms.workforce.view_assigned_projects %}
+            <article class="crm-stat-card">
+                <p class="crm-stat-card__label">Field Work</p>
+                <h2 class="crm-stat-card__value">Mobile</h2>
+                <p class="crm-stat-card__note">Access assigned projects and field updates.</p>
+                <a href="/workforce/" class="crm-btn crm-btn--secondary">Open Field Work</a>
+            </article>
+        {% endif %}
+    </section>
+
+    <section class="crm-grid crm-grid--3">
+        {% if perms.media_assets.view_projectphoto %}
+            <article class="crm-card">
+                <div class="crm-card__header">
+                    <div>
+                        <h2 class="crm-card__title">Project Photos</h2>
+                        <p class="crm-card__subtitle">Review visual evidence and project progress.</p>
+                    </div>
+                </div>
+                <div class="crm-card__body">
+                    <a href="/media-assets/" class="crm-btn crm-btn--outline">Open Photos</a>
+                </div>
+            </article>
+        {% endif %}
+
+        {% if perms.visits.view_technicalvisit %}
+            <article class="crm-card">
+                <div class="crm-card__header">
+                    <div>
+                        <h2 class="crm-card__title">Technical Visits</h2>
+                        <p class="crm-card__subtitle">Schedule visits and monitor reminders.</p>
+                    </div>
+                </div>
+                <div class="crm-card__body">
+                    <a href="/visits/" class="crm-btn crm-btn--outline">Open Visits</a>
+                </div>
+            </article>
+        {% endif %}
+
+        {% if perms.billing.view_accountreceivable %}
+            <article class="crm-card">
+                <div class="crm-card__header">
+                    <div>
+                        <h2 class="crm-card__title">Billing</h2>
+                        <p class="crm-card__subtitle">Track receivables, payments, and pending balances.</p>
+                    </div>
+                </div>
+                <div class="crm-card__body">
+                    <a href="/billing/" class="crm-btn crm-btn--outline">Open Billing</a>
+                </div>
+            </article>
+        {% endif %}
+    </section>
+
+    <section class="crm-card crm-card--highlight">
+        <div class="crm-card__header">
+            <div>
+                <h2 class="crm-card__title">Quick Access</h2>
+                <p class="crm-card__subtitle">Use the shortcuts below to move through the CRM faster.</p>
+            </div>
+        </div>
+
+        <div class="crm-card__body">
+            <div class="crm-actions">
+                <a href="{% url 'users:profile' %}" class="crm-btn crm-btn--primary">My Profile</a>
+
+                {% if perms.users.view_user %}
+                    <a href="/users/" class="crm-btn crm-btn--outline">Users</a>
+                {% endif %}
+
+                {% if perms.auth.view_group %}
+                    <a href="/users/roles/" class="crm-btn crm-btn--outline">Roles</a>
+                {% endif %}
+
+                {% if perms.users.view_useraccesslog %}
+                    <a href="/users/access-logs/" class="crm-btn crm-btn--outline">Access Logs</a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+</div>
 {% endblock %}

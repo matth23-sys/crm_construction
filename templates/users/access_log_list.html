@@ -1,31 +1,101 @@
 {% extends "base.html" %}
+
+{% block title %}Access Logs | CRM Construction{% endblock %}
+
 {% block content %}
-  <h1>Logs de acceso</h1>
+<div class="crm-page-shell">
 
-  <ul>
-    {% for log in logs %}
-      <li>
-        {{ log.created_at }} |
-        {{ log.get_event_type_display }} |
-        {{ log.get_status_display }} |
-        {{ log.identifier }} |
-        {{ log.ip_address|default:"-" }} |
-        {{ log.detail }}
-      </li>
-    {% empty %}
-      <li>No hay registros de acceso.</li>
-    {% endfor %}
-  </ul>
+    <div class="crm-page-header">
+        <div class="crm-page-header__content">
+            <p class="crm-page-header__eyebrow">Security</p>
+            <h1 class="crm-page-header__title">Access Logs</h1>
+            <p class="crm-page-header__description">Review authentication events and access activity registered by the CRM.</p>
+        </div>
 
-  {% if is_paginated %}
-    <div>
-      {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
-      {% endif %}
-      <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-      {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
-      {% endif %}
+        <div class="crm-page-header__actions">
+            <a href="{% url 'users:list' %}" class="crm-btn crm-btn--outline">Back to Users</a>
+        </div>
     </div>
-  {% endif %}
+
+    <section class="crm-table-card is-mobile-cards">
+        <div class="crm-table-toolbar">
+            <h2 class="crm-table-toolbar__title">Security Events</h2>
+        </div>
+
+        <div class="crm-table-wrap">
+            <table class="crm-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Identifier</th>
+                        <th>Event</th>
+                        <th>Status</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for log in access_logs|default:object_list %}
+                        <tr>
+                            <td>{{ log.created_at|date:"m/d/Y H:i" }}</td>
+                            <td>{{ log.user|default:"-" }}</td>
+                            <td>{{ log.identifier|default:"-" }}</td>
+                            <td>{{ log.get_event_type_display|default:log.event_type }}</td>
+                            <td>
+                                {% if log.status == "success" %}
+                                    <span class="crm-status crm-status--success">Success</span>
+                                {% elif log.status == "failed" %}
+                                    <span class="crm-status crm-status--danger">Failed</span>
+                                {% else %}
+                                    <span class="crm-status crm-status--muted">{{ log.get_status_display|default:log.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ log.ip_address|default:"-" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6">
+                                {% include "includes/empty_state.html" with title="No access logs found" description="Security events will appear here after users interact with the login system." %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="crm-mobile-card-list">
+            {% for log in access_logs|default:object_list %}
+                <article class="crm-mobile-card">
+                    <div class="crm-mobile-card__header">
+                        <div>
+                            <h2 class="crm-mobile-card__title">{{ log.get_event_type_display|default:log.event_type }}</h2>
+                            <p class="crm-mobile-card__subtitle">{{ log.created_at|date:"m/d/Y H:i" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="crm-mobile-card__meta">
+                        <div class="crm-mobile-card__meta-row">
+                            <span class="crm-mobile-card__label">User</span>
+                            <span class="crm-mobile-card__value">{{ log.user|default:"-" }}</span>
+                        </div>
+
+                        <div class="crm-mobile-card__meta-row">
+                            <span class="crm-mobile-card__label">Identifier</span>
+                            <span class="crm-mobile-card__value">{{ log.identifier|default:"-" }}</span>
+                        </div>
+
+                        <div class="crm-mobile-card__meta-row">
+                            <span class="crm-mobile-card__label">IP</span>
+                            <span class="crm-mobile-card__value">{{ log.ip_address|default:"-" }}</span>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    {% include "includes/pagination.html" %}
+
+</div>
 {% endblock %}

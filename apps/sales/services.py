@@ -111,13 +111,20 @@ def bootstrap_default_stages() -> list[OpportunityStage]:
 
 
 def get_default_stage() -> OpportunityStage:
-    try:
-        return OpportunityStage.objects.get(is_default=True, is_active=True)
-    except OpportunityStage.DoesNotExist as exc:
-        raise ValidationError("No active default opportunity stage is configured.") from exc
-    except OpportunityStage.MultipleObjectsReturned as exc:
-        raise ValidationError("Multiple default opportunity stages are configured.") from exc
+    stage = OpportunityStage.objects.filter(
+        is_default=True,
+        is_active=True,
+    ).first()
 
+    if not stage:
+        stage = OpportunityStage.objects.filter(
+            is_active=True,
+        ).order_by("position").first()
+
+    if not stage:
+        raise ValidationError("No active opportunity stage is configured.")
+
+    return stage
 
 def _create_stage_history_entry(
     *,

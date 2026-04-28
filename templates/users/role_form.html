@@ -1,12 +1,44 @@
 {% extends "base.html" %}
+
+{% block title %}{{ title|default:"Role Form" }} | CRM Construction{% endblock %}
+
 {% block content %}
-  <h1>{{ title }}</h1>
+<div class="crm-page-shell">
 
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Guardar rol</button>
-  </form>
+    {% include "includes/page_header.html" with eyebrow="Administration" title=title|default:"Role Form" description="Create or update a role and its permissions." %}
 
-  <p><a href="{% url 'users:role_list' %}">Volver a roles</a></p>
+    <form method="post" class="crm-form-card">
+        {% csrf_token %}
+
+        <div class="crm-form-card__header">
+            <h2 class="crm-form-card__title">Role Information</h2>
+            <p class="crm-form-card__description">Roles control what each user can access in the CRM.</p>
+        </div>
+
+        <div class="crm-form-card__body">
+            <div class="crm-form-grid">
+                {% for field in form %}
+                    <div class="crm-form-field crm-form-field--full">
+                        <label class="crm-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <small class="crm-form-help">{{ field.help_text }}</small>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <div class="errorlist">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="crm-form-card__footer">
+            <a href="{% url 'users:role_list' %}" class="crm-btn crm-btn--outline">Cancel</a>
+            <button type="submit" class="crm-btn crm-btn--primary">Save Role</button>
+        </div>
+    </form>
+
+</div>
 {% endblock %}

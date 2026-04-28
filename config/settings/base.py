@@ -1,7 +1,17 @@
 from pathlib import Path
 from decouple import Csv, config
+import django.template.context
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+LANGUAGE_CODE = "en"
+
+LANGUAGES = [
+    ("en", "English"),
+    ("es", "Spanish"),
+]
+
+USE_I18N = True
 
 SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-me")
 DEBUG = config("DEBUG", default=False, cast=bool)
@@ -10,6 +20,16 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=Csv(
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
 
 
+
+def patch_context_copy():
+    if not hasattr(django.template.context.Context, "__copy__"):
+        def __copy__(self):
+            duplicate = self.__class__()
+            duplicate.dicts = self.dicts[:]
+            return duplicate
+        django.template.context.Context.__copy__ = __copy__
+
+patch_context_copy()
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -17,6 +37,7 @@ DJANGO_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "apps.billing",
 ]
 
 THIRD_PARTY_APPS = []
@@ -24,11 +45,15 @@ THIRD_PARTY_APPS = []
 LOCAL_APPS = [
     "core",
     "apps.users",
-    "apps.clients",   # agregado
+    "apps.clients",   
     "apps.sales",
+    "apps.projects",
+    "apps.workforce",
+    "apps.media_assets",
+    "apps.visits",
+    "apps.notifications",
+
 ]
-
-
 
 INSTALLED_APPS = [
     # Django core apps
@@ -39,14 +64,21 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Third-party apps (si las hay)
-    # 'django_extensions',
-    # 'rest_framework', etc.
-
     # Local apps
     'core',
     'apps.users',
-    'apps.clients',                  # <-- Ya agregada
+    'apps.clients',                  
+    'apps.sales',
+    "apps.projects",   
+    "apps.workforce",
+    "apps.media_assets",
+    "apps.visits",
+    "apps.notifications",
+    "apps.billing",
+
+    # Third-party
+    "django_extensions",
+    
 ]
 
 
@@ -61,6 +93,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "core.middleware.request_id.RequestIDMiddleware",
     "core.middleware.activity_logging.ActivityLoggingMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -148,23 +181,31 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "dashboard"  # Sin namespace
+LOGIN_REDIRECT_URL = "dashboard_home"  
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 
 EMAIL_BACKEND = config(
     "EMAIL_BACKEND",
-    default="django.core.mail.backends.console.EmailBackend",
+    default="django.core.mail.backends.smtp.EmailBackend",
 )
-EMAIL_HOST = config("EMAIL_HOST", default="localhost")
-EMAIL_PORT = config("EMAIL_PORT", default=1025, cast=int)
+EMAIL_HOST = config("EMAIL_HOST", default="")
+EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False, cast=bool)
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=True, cast=bool)
+
 DEFAULT_FROM_EMAIL = config(
     "DEFAULT_FROM_EMAIL",
     default="CRM Construction <no-reply@example.com>",
 )
-SERVER_EMAIL = DEFAULT_FROM_EMAIL
+SERVER_EMAIL = config(
+    "SERVER_EMAIL",
+    default=DEFAULT_FROM_EMAIL,
+)
+
+SITE_URL = config("SITE_URL", default="http://127.0.0.1:8000")
+CRON_TOKEN = config("CRON_TOKEN", default="")
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_HTTPONLY = True
@@ -222,19 +263,7 @@ LOGGING = {
 }
 
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
-]
+
+
 
 

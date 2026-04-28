@@ -1,14 +1,44 @@
 {% extends "base.html" %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block title %}{{ title }} | CRM Construction{% endblock %}
 
 {% block content %}
-  <h1>{{ page_title }}</h1>
+<div class="crm-page-shell">
 
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">{{ submit_label }}</button>
-    <a href="{% url 'clients:list' %}">Cancelar</a>
-  </form>
+    {% include "includes/page_header.html" with eyebrow="Clients" title=title description="Complete the client information and save the record." %}
+
+    <form method="post" class="crm-form-card">
+        {% csrf_token %}
+
+        <div class="crm-form-card__header">
+            <h2 class="crm-form-card__title">Client Information</h2>
+            <p class="crm-form-card__description">This information will be used across sales, projects, visits, and billing.</p>
+        </div>
+
+        <div class="crm-form-card__body">
+            <div class="crm-form-grid">
+                {% for field in form %}
+                    <div class="crm-form-field {% if field.name == 'notes' or field.name == 'address' %}crm-form-field--full{% endif %}">
+                        <label class="crm-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <small class="crm-form-help">{{ field.help_text }}</small>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <div class="errorlist">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="crm-form-card__footer">
+            <a href="{% url 'clients:list' %}" class="crm-btn crm-btn--outline">Cancel</a>
+            <button type="submit" class="crm-btn crm-btn--primary">Save Client</button>
+        </div>
+    </form>
+
+</div>
 {% endblock %}

@@ -1,12 +1,44 @@
 {% extends "base.html" %}
+
+{% block title %}{{ title|default:"User Form" }} | CRM Construction{% endblock %}
+
 {% block content %}
-  <h1>{{ title|default:"Formulario de usuario" }}</h1>
+<div class="crm-page-shell">
 
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Guardar</button>
-  </form>
+    {% include "includes/page_header.html" with eyebrow="Administration" title=title|default:"User Form" description="Complete the user account information and save your changes." %}
 
-  <p><a href="{% url 'users:list' %}">Volver al listado</a></p>
+    <form method="post" class="crm-form-card">
+        {% csrf_token %}
+
+        <div class="crm-form-card__header">
+            <h2 class="crm-form-card__title">User Information</h2>
+            <p class="crm-form-card__description">Fields and permissions depend on the current user management form.</p>
+        </div>
+
+        <div class="crm-form-card__body">
+            <div class="crm-form-grid">
+                {% for field in form %}
+                    <div class="crm-form-field {% if field.field.widget.input_type == 'checkbox' %}crm-form-field--full{% endif %}">
+                        <label class="crm-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <small class="crm-form-help">{{ field.help_text }}</small>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <div class="errorlist">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="crm-form-card__footer">
+            <a href="{% url 'users:list' %}" class="crm-btn crm-btn--outline">Cancel</a>
+            <button type="submit" class="crm-btn crm-btn--primary">Save</button>
+        </div>
+    </form>
+
+</div>
 {% endblock %}

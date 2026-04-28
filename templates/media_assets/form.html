@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --dl-bg: #050505;
+    --dl-surface: #121212;
+    --dl-surface-2: #1A1A1A;
+    --dl-highlight: #00A3FF;
+    --dl-primary: #0055FF;
+    --dl-secondary: #002277;
+    --dl-border: #0077FF;
+    --dl-text: #FFFFFF;
+    --dl-text-muted: #B0B0B0;
+    --dl-shadow: 0 14px 40px rgba(0, 85, 255, 0.18);
+    --dl-radius: 18px;
+    --dl-transition: 220ms ease;
+  }
+
+  .maf-page {
+    min-height: 100vh;
+    padding: 2rem 0 3rem;
+    background:
+      radial-gradient(circle at top right, rgba(0, 163, 255, 0.10), transparent 26%),
+      radial-gradient(circle at bottom left, rgba(0, 34, 119, 0.18), transparent 28%),
+      var(--dl-bg);
+    color: var(--dl-text);
+  }
+
+  .maf-container {
+    width: min(860px, calc(100% - 2rem));
+    margin: 0 auto;
+  }
+
+  .maf-card {
+    background: linear-gradient(180deg, rgba(26,26,26,.98), rgba(18,18,18,.98));
+    border: 1px solid rgba(0, 119, 255, 0.28);
+    border-radius: var(--dl-radius);
+    box-shadow: var(--dl-shadow);
+    overflow: hidden;
+  }
+
+  .maf-header {
+    padding: 1.4rem 1.4rem 1rem;
+    border-bottom: 1px solid rgba(0, 119, 255, 0.18);
+    background: linear-gradient(180deg, rgba(0, 85, 255, 0.08), rgba(0, 0, 0, 0));
+  }
+
+  .maf-kicker {
+    display: inline-flex;
+    padding: .42rem .8rem;
+    border-radius: 999px;
+    background: rgba(0, 163, 255, 0.10);
+    border: 1px solid rgba(0, 163, 255, 0.22);
+    color: var(--dl-highlight);
+    font-size: .8rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .maf-title {
+    margin: .85rem 0 .55rem;
+    font-size: clamp(1.8rem, 3vw, 2.35rem);
+    line-height: 1.06;
+    color: var(--dl-text);
+  }
+
+  .maf-meta {
+    margin: 0;
+    color: var(--dl-text-muted);
+    line-height: 1.7;
+  }
+
+  .maf-body {
+    padding: 1.4rem;
+  }
+
+  .maf-form-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .maf-form-grid p {
+    margin: 0;
+  }
+
+  .maf-form-grid label {
+    display: block;
+    margin-bottom: .45rem;
+    font-weight: 600;
+    color: var(--dl-text);
+  }
+
+  .maf-form-grid input,
+  .maf-form-grid select,
+  .maf-form-grid textarea {
+    width: 100%;
+    min-height: 48px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 119, 255, 0.24);
+    background: #0D0D0D;
+    color: var(--dl-text);
+    padding: .82rem .92rem;
+    outline: none;
+    transition: border-color var(--dl-transition), box-shadow var(--dl-transition), background var(--dl-transition);
+  }
+
+  .maf-form-grid textarea {
+    min-height: 150px;
+    resize: vertical;
+  }
+
+  .maf-form-grid input:focus,
+  .maf-form-grid select:focus,
+  .maf-form-grid textarea:focus {
+    border-color: var(--dl-highlight);
+    box-shadow: 0 0 0 3px rgba(0, 163, 255, 0.14);
+  }
+
+  .maf-helptext {
+    margin-top: .35rem;
+    color: var(--dl-text-muted);
+    font-size: .88rem;
+  }
+
+  .maf-errors,
+  .maf-form-grid .errorlist {
+    list-style: none;
+    padding: 0;
+    margin: .45rem 0 0;
+    color: #7ccfff;
+    font-size: .9rem;
+  }
+
+  .maf-actions {
+    display: flex;
+    gap: .85rem;
+    flex-wrap: wrap;
+    margin-top: 1.2rem;
+  }
+
+  .maf-btn,
+  .maf-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    padding: .85rem 1.2rem;
+    border-radius: 999px;
+    font-weight: 700;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: transform var(--dl-transition), box-shadow var(--dl-transition), background var(--dl-transition);
+    cursor: pointer;
+  }
+
+  .maf-btn {
+    background: linear-gradient(135deg, var(--dl-highlight), var(--dl-primary));
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(0, 163, 255, 0.24);
+  }
+
+  .maf-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(0, 163, 255, 0.30);
+  }
+
+  .maf-btn-secondary {
+    background: rgba(0, 85, 255, 0.10);
+    color: var(--dl-text);
+    border-color: rgba(0, 119, 255, 0.30);
+  }
+
+  .maf-btn-secondary:hover {
+    transform: translateY(-2px);
+    background: rgba(0, 85, 255, 0.18);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="maf-page">
+  <div class="maf-container">
+    <div class="maf-card">
+      <div class="maf-header">
+        <span class="maf-kicker">Media Assets</span>
+        <h1 class="maf-title">{{ page_title }}</h1>
+        <p class="maf-meta">
+          <strong>Project:</strong> {{ project.name }}<br>
+          <strong>Client:</strong> {{ project.client }}
+        </p>
+      </div>
+
+      <div class="maf-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <ul class="maf-errors">
+              {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+
+          <div class="maf-form-grid">
+            {{ form.as_p }}
+          </div>
+
+          <div class="maf-actions">
+            <button type="submit" class="maf-btn">{{ submit_label }}</button>
+            <a href="{{ cancel_url }}" class="maf-btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

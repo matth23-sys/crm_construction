@@ -1,0 +1,21 @@
+<div class="crm-page-header">
+    <div class="crm-page-header__content">
+        {% if eyebrow %}
+            <p class="crm-page-header__eyebrow">{{ eyebrow }}</p>
+        {% endif %}
+
+        <h1 class="crm-page-header__title">{{ title }}</h1>
+
+        {% if description %}
+            <p class="crm-page-header__description">{{ description }}</p>
+        {% endif %}
+    </div>
+
+    {% if action_url and action_label %}
+        <div class="crm-page-header__actions">
+            <a class="crm-btn crm-btn--primary" href="{{ action_url }}">
+                {{ action_label }}
+            </a>
+        </div>
+    {% endif %}
+</div>

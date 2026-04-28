@@ -1,0 +1,14 @@
+Hola {{ responsible.get_full_name|default:responsible.username }},
+
+Este es un recordatorio de tu visita técnica:
+
+Título: {{ visit.title }}
+Cliente: {{ client.legal_name }}
+Fecha: {{ scheduled_for|date:"d/m/Y H:i" }}
+Ubicación: {{ location|default:"No especificada" }}
+Proyecto: {{ project.name|default:"Sin proyecto asociado" }}
+
+Por favor, confirma tu asistencia o reprograma si es necesario.
+
+--
+CRM Construction

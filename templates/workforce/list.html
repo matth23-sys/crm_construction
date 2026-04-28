@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  /* Paleta Dev Layer aplicada a la sección */
+  body {
+    background-color: #050505;
+    color: #ffffff;
+  }
+
+  .container {
+    color: #ffffff;
+  }
+
+  /* Títulos y textos */
+  h1, h2, .h3, .h5 {
+    color: #ffffff !important;
+    font-weight: 600;
+  }
+
+  .text-muted {
+    color: #b0b0b0 !important;
+  }
+
+  /* Tarjetas (Capas / Layers) */
+  .card {
+    background-color: #121212 !important;
+    border: 1px solid #222222 !important;
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+  }
+
+  .card.shadow-sm:hover {
+    transform: translateY(-4px);
+    border-color: #0055FF !important;
+  }
+
+  /* Inputs y Formularios */
+  .form-control, .form-select {
+    background-color: #1a1a1a !important;
+    border: 1px solid #333333 !important;
+    color: #ffffff !important;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: #00A3FF !important;
+    box-shadow: 0 0 0 0.25rem rgba(0, 163, 255, 0.25);
+  }
+
+  /* Botones - Usando el degradado del logo */
+  .btn-primary {
+    background: linear-gradient(135deg, #0055FF 0%, #00A3FF 100%) !important;
+    border: none !important;
+    font-weight: 500;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #00A3FF 0%, #0055FF 100%) !important;
+    filter: brightness(1.1);
+  }
+
+  .btn-outline-primary {
+    color: #00A3FF !important;
+    border-color: #00A3FF !important;
+  }
+
+  .btn-outline-primary:hover {
+    background-color: #00A3FF !important;
+    color: #ffffff !important;
+  }
+
+  /* Badges y Paginación */
+  .badge.text-bg-secondary {
+    background-color: #222222 !important;
+    color: #00A3FF !important;
+    border: 1px solid #0055FF;
+  }
+
+  .pagination .page-link {
+    background-color: #121212;
+    border-color: #333333;
+    color: #00A3FF;
+  }
+
+  .pagination .page-item.active .page-link {
+    background-color: #0055FF;
+    border-color: #0055FF;
+  }
+
+  /* Listas */
+  strong {
+    color: #00A3FF;
+  }
+</style>
+
+<section class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-1">My projects</h1>
+      <p class="text-muted mb-0">Only projects where you have an active assignment are visible here.</p>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="{{ filter_form.search.id_for_label }}">{{ filter_form.search.label }}</label>
+          {{ filter_form.search }}
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label" for="{{ filter_form.status.id_for_label }}">{{ filter_form.status.label }}</label>
+          {{ filter_form.status }}
+        </div>
+        <div class="col-12 col-md-3 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if projects %}
+    <div class="row g-3">
+      {% for project in projects %}
+        <div class="col-12 col-lg-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                <div>
+                  <h2 class="h5 mb-1">{{ project.name }}</h2>
+                  <p class="text-muted mb-1">
+                    Client: {{ project.client.commercial_name|default:project.client.legal_name }}
+                  </p>
+                  <p class="text-muted mb-1">
+                    Site: {{ project.location|default:"—" }}
+                  </p>
+                  <p class="small text-muted mb-0">
+                    Ref: PRJ-{{ project.pk|stringformat:"s"|slice:":8"|upper }}
+                  </p>
+                </div>
+                <span class="badge text-bg-secondary">{{ project.get_status_display|default:project.status }}</span>
+              </div>
+
+              <ul class="list-unstyled small mb-3">
+                <li><strong>Responsible:</strong> {{ project.responsible|default:"—" }}</li>
+                <li><strong>Expected end:</strong> {{ project.expected_end_date|default:"—" }}</li>
+              </ul>
+
+              <a href="{% url 'workforce:detail' project.pk %}" class="btn btn-outline-primary">
+                Open assigned work
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+      <nav class="mt-4">
+        <ul class="pagination">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+          {% endif %}
+          <li class="page-item active">
+            <span class="page-link">{{ page_obj.number }}</span>
+          </li>
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  {% else %}
+    <div class="card">
+      <div class="card-body">
+        <p class="mb-0 text-muted">No assigned projects found.</p>
+      </div>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

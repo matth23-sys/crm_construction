@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+    <div>
+      <h1>Technical visits</h1>
+      <p>Manage scheduled visits, responsible users, and reminder flow.</p>
+    </div>
+
+    {% if can_create %}
+      <a href="{% url 'visits:create' %}">Schedule visit</a>
+    {% endif %}
+  </div>
+
+  <hr>
+
+  <form method="get" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:1rem;align-items:end;margin-bottom:1.5rem;">
+    <div>
+      <label for="{{ filter_form.q.id_for_label }}">Search</label>
+      {{ filter_form.q }}
+    </div>
+    <div>
+      <label for="{{ filter_form.status.id_for_label }}">Status</label>
+      {{ filter_form.status }}
+    </div>
+    <div>
+      <label for="{{ filter_form.client.id_for_label }}">Client</label>
+      {{ filter_form.client }}
+    </div>
+    <div>
+      <label for="{{ filter_form.responsible.id_for_label }}">Responsible</label>
+      {{ filter_form.responsible }}
+    </div>
+    <div>
+      <label for="{{ filter_form.date_from.id_for_label }}">From</label>
+      {{ filter_form.date_from }}
+    </div>
+    <div>
+      <label for="{{ filter_form.date_to.id_for_label }}">To</label>
+      {{ filter_form.date_to }}
+    </div>
+    <div>
+      <button type="submit">Filter</button>
+    </div>
+  </form>
+
+  {% if visits %}
+    <div style="display:grid;gap:1rem;">
+      {% for visit in visits %}
+        <article style="padding:1rem;border:1px solid #ddd;border-radius:12px;">
+          <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+            <div>
+              <h3 style="margin:0 0 .4rem;">{{ visit.title }}</h3>
+              <p style="margin:0;">
+                <strong>Client:</strong> {{ visit.client }}<br>
+                <strong>Project:</strong> {{ visit.project|default:"—" }}<br>
+                <strong>Responsible:</strong> {{ visit.responsible }}<br>
+                <strong>When:</strong> {{ visit.scheduled_start|date:"Y-m-d H:i" }} → {{ visit.scheduled_end|date:"Y-m-d H:i" }}<br>
+                <strong>Status:</strong> {{ visit.get_status_display }}
+              </p>
+            </div>
+
+            <div>
+              <a href="{% url 'visits:detail' pk=visit.pk %}">View detail</a>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No technical visits found.</p>
+  {% endif %}
+</div>
+{% endblock %}

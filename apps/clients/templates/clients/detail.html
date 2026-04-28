@@ -1,98 +1,235 @@
 {% extends "base.html" %}
 
-{% block title %}{{ client.display_name }}{% endblock %}
+{% block title %}{{ client.display_name }} | CRM Construction{% endblock %}
 
 {% block content %}
-  <h1>{{ client.display_name }}</h1>
+<div class="crm-page-shell">
 
-  <p><strong>Tipo:</strong> {{ client.get_client_type_display }}</p>
-  <p><strong>Estado:</strong> {{ client.get_status_display }}</p>
-  <p><strong>Documento:</strong> {{ client.document_number|default:"-" }}</p>
-  <p><strong>Email:</strong> {{ client.email|default:"-" }}</p>
-  <p><strong>Teléfono:</strong> {{ client.phone|default:"-" }}</p>
-  <p><strong>Teléfono alterno:</strong> {{ client.alternate_phone|default:"-" }}</p>
-  <p><strong>Dirección:</strong> {{ client.address|default:"-" }}</p>
-  <p><strong>Ciudad:</strong> {{ client.city|default:"-" }}</p>
-  <p><strong>Provincia/Estado:</strong> {{ client.state|default:"-" }}</p>
-  <p><strong>País:</strong> {{ client.country|default:"-" }}</p>
-  <p><strong>Notas internas:</strong></p>
-  <div>{{ client.notes|linebreaks }}</div>
+    <div class="crm-page-header">
+        <div class="crm-page-header__content">
+            <p class="crm-page-header__eyebrow">Client Details</p>
+            <h1 class="crm-page-header__title">{{ client.display_name }}</h1>
+            <p class="crm-page-header__description">Review client information, status, internal notes, and interaction history.</p>
+        </div>
 
-  {% if client.deactivated_at %}
-    <p>
-      <strong>Desactivado el:</strong> {{ client.deactivated_at|date:"d/m/Y H:i" }}
-      {% if client.deactivated_by %}
-        por {{ client.deactivated_by }}
-      {% endif %}
-    </p>
-  {% endif %}
+        <div class="crm-page-header__actions">
+            <a href="{% url 'clients:list' %}" class="crm-btn crm-btn--outline">Back to Clients</a>
 
-  <p>
-    <a href="{% url 'clients:list' %}">Volver al listado</a>
+            {% if perms.clients.change_client %}
+                <a href="{% url 'clients:edit' client.pk %}" class="crm-btn crm-btn--primary">Edit Client</a>
+            {% endif %}
+        </div>
+    </div>
 
-    {% if perms.clients.change_client %}
-      | <a href="{% url 'clients:edit' client.pk %}">Editar</a>
-    {% endif %}
-  </p>
+    <section class="crm-grid crm-grid--3">
+        <article class="crm-card crm-span-2">
+            <div class="crm-card__header">
+                <div>
+                    <h2 class="crm-card__title">Client Information</h2>
+                    <p class="crm-card__subtitle">Main client record and contact details.</p>
+                </div>
+            </div>
 
-  {% if client.is_active %}
-    {% if perms.clients.deactivate_client %}
-      <form method="post" action="{% url 'clients:deactivate' client.pk %}">
-        {% csrf_token %}
-        <button type="submit">Desactivar cliente</button>
-      </form>
-    {% endif %}
-  {% else %}
-    {% if perms.clients.reactivate_client %}
-      <form method="post" action="{% url 'clients:reactivate' client.pk %}">
-        {% csrf_token %}
-        <button type="submit">Reactivar cliente</button>
-      </form>
-    {% endif %}
-  {% endif %}
+            <div class="crm-card__body">
+                <div class="crm-detail-grid">
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">Type</span>
+                        <span class="crm-detail-value">{{ client.get_client_type_display }}</span>
+                    </div>
 
-  <hr>
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">Status</span>
+                        <span class="crm-detail-value">
+                            {% if client.is_active %}
+                                <span class="crm-status crm-status--active">{{ client.get_status_display }}</span>
+                            {% else %}
+                                <span class="crm-status crm-status--inactive">{{ client.get_status_display }}</span>
+                            {% endif %}
+                        </span>
+                    </div>
 
-  <h2>Registrar interacción</h2>
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">Document</span>
+                        <span class="crm-detail-value">{{ client.document_number|default:"-" }}</span>
+                    </div>
 
-  {% if perms.clients.add_clientinteraction %}
-    <form method="post" action="{% url 'clients:interaction_create' client.pk %}">
-      {% csrf_token %}
-      {{ interaction_form.as_p }}
-      <button type="submit">Guardar interacción</button>
-    </form>
-  {% else %}
-    <p>No tienes permisos para registrar interacciones.</p>
-  {% endif %}
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">Email</span>
+                        <span class="crm-detail-value">{{ client.email|default:"-" }}</span>
+                    </div>
 
-  <hr>
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">Phone</span>
+                        <span class="crm-detail-value">{{ client.phone|default:"-" }}</span>
+                    </div>
 
-  <h2>Historial de interacciones</h2>
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">Alternate Phone</span>
+                        <span class="crm-detail-value">{{ client.alternate_phone|default:"-" }}</span>
+                    </div>
 
-  {% if client.interactions.all %}
-    {% for interaction in client.interactions.all %}
-      <article>
-        <h3>{{ interaction.summary }}</h3>
-        <p>
-          <strong>Tipo:</strong> {{ interaction.get_interaction_type_display }} |
-          <strong>Fecha:</strong> {{ interaction.occurred_at|date:"d/m/Y H:i" }}
-        </p>
+                    <div class="crm-detail-item crm-detail-item--full">
+                        <span class="crm-detail-label">Address</span>
+                        <span class="crm-detail-value">{{ client.address|default:"-" }}</span>
+                    </div>
 
-        {% if interaction.registered_by %}
-          <p><strong>Registrado por:</strong> {{ interaction.registered_by }}</p>
-        {% endif %}
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">City</span>
+                        <span class="crm-detail-value">{{ client.city|default:"-" }}</span>
+                    </div>
 
-        {% if interaction.description %}
-          <div>{{ interaction.description|linebreaks }}</div>
-        {% endif %}
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">State</span>
+                        <span class="crm-detail-value">{{ client.state|default:"-" }}</span>
+                    </div>
 
-        {% if interaction.follow_up_at %}
-          <p><strong>Seguimiento:</strong> {{ interaction.follow_up_at|date:"d/m/Y H:i" }}</p>
-        {% endif %}
-      </article>
-      <hr>
-    {% endfor %}
-  {% else %}
-    <p>Este cliente todavía no tiene interacciones registradas.</p>
-  {% endif %}
+                    <div class="crm-detail-item">
+                        <span class="crm-detail-label">Country</span>
+                        <span class="crm-detail-value">{{ client.country|default:"-" }}</span>
+                    </div>
+
+                    <div class="crm-detail-item crm-detail-item--full">
+                        <span class="crm-detail-label">Internal Notes</span>
+                        <span class="crm-detail-value">{{ client.notes|linebreaks }}</span>
+                    </div>
+
+                    {% if client.deactivated_at %}
+                        <div class="crm-detail-item crm-detail-item--full">
+                            <span class="crm-detail-label">Deactivated At</span>
+                            <span class="crm-detail-value">
+                                {{ client.deactivated_at|date:"m/d/Y H:i" }}
+                                {% if client.deactivated_by %}
+                                    by {{ client.deactivated_by }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+
+        <aside class="crm-card">
+            <div class="crm-card__header">
+                <div>
+                    <h2 class="crm-card__title">Client Actions</h2>
+                    <p class="crm-card__subtitle">Manage this client status.</p>
+                </div>
+            </div>
+
+            <div class="crm-card__body">
+                <div class="crm-actions">
+                    {% if client.is_active %}
+                        {% if perms.clients.deactivate_client %}
+                            <form method="post" action="{% url 'clients:deactivate' client.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="crm-btn crm-btn--danger crm-btn--full">Deactivate Client</button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        {% if perms.clients.reactivate_client %}
+                            <form method="post" action="{% url 'clients:reactivate' client.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="crm-btn crm-btn--success crm-btn--full">Reactivate Client</button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+
+                    <a href="{% url 'clients:list' %}" class="crm-btn crm-btn--outline crm-btn--full">Back to List</a>
+                </div>
+            </div>
+        </aside>
+    </section>
+
+    <section class="crm-grid crm-grid--3">
+        <article class="crm-card">
+            <div class="crm-card__header">
+                <div>
+                    <h2 class="crm-card__title">Register Interaction</h2>
+                    <p class="crm-card__subtitle">Add a new note or contact record for this client.</p>
+                </div>
+            </div>
+
+            <div class="crm-card__body">
+                {% if perms.clients.add_clientinteraction %}
+                    <form method="post" action="{% url 'clients:interaction_create' client.pk %}" class="crm-form">
+                        {% csrf_token %}
+
+                        {% for field in interaction_form %}
+                            <div class="crm-form-field">
+                                <label class="crm-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+
+                                {% if field.help_text %}
+                                    <small class="crm-form-help">{{ field.help_text }}</small>
+                                {% endif %}
+
+                                {% for error in field.errors %}
+                                    <div class="errorlist">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+
+                        <button type="submit" class="crm-btn crm-btn--primary crm-btn--full">Save Interaction</button>
+                    </form>
+                {% else %}
+                    <div class="crm-alert crm-alert--warning">
+                        You do not have permission to register interactions.
+                    </div>
+                {% endif %}
+            </div>
+        </article>
+
+        <article class="crm-card crm-span-2">
+            <div class="crm-card__header">
+                <div>
+                    <h2 class="crm-card__title">Interaction History</h2>
+                    <p class="crm-card__subtitle">Chronological client activity and follow-up records.</p>
+                </div>
+            </div>
+
+            <div class="crm-card__body">
+                <div class="crm-timeline">
+                    {% if client.interactions.all %}
+                        {% for interaction in client.interactions.all %}
+                            <article class="crm-timeline-item">
+                                <div class="crm-timeline-item__header">
+                                    <div>
+                                        <h3>{{ interaction.summary }}</h3>
+                                        <p>
+                                            {{ interaction.get_interaction_type_display }} ·
+                                            {{ interaction.occurred_at|date:"m/d/Y H:i" }}
+                                        </p>
+                                    </div>
+
+                                    <span class="crm-badge crm-badge--info">
+                                        {{ interaction.get_interaction_type_display }}
+                                    </span>
+                                </div>
+
+                                {% if interaction.registered_by %}
+                                    <p class="crm-timeline-item__meta">Registered by {{ interaction.registered_by }}</p>
+                                {% endif %}
+
+                                {% if interaction.description %}
+                                    <div class="crm-timeline-item__body">
+                                        {{ interaction.description|linebreaks }}
+                                    </div>
+                                {% endif %}
+
+                                {% if interaction.follow_up_at %}
+                                    <p class="crm-timeline-item__follow">
+                                        Follow-up: {{ interaction.follow_up_at|date:"m/d/Y H:i" }}
+                                    </p>
+                                {% endif %}
+                            </article>
+                        {% endfor %}
+                    {% else %}
+                        {% include "includes/empty_state.html" with title="No interactions yet" description="This client does not have registered interactions yet." %}
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+    </section>
+
+</div>
 {% endblock %}

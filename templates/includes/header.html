@@ -1,0 +1,254 @@
+{% load i18n %}
+
+<header class="crm-header-v2" data-crm-header>
+    <div class="crm-header-v2__inner">
+
+        <a class="crm-header-v2__brand" href="{% url 'dashboard_home' %}" aria-label="CRM Construction Dashboard">
+            <span class="crm-header-v2__brand-mark">CRM</span>
+            <span class="crm-header-v2__brand-text">
+                <span class="crm-header-v2__brand-title">CRM Construction</span>
+                <span class="crm-header-v2__brand-subtitle">Operations System</span>
+            </span>
+        </a>
+
+        {% if request.user.is_authenticated %}
+            <nav class="crm-header-v2__nav" aria-label="Main Navigation">
+
+                <a class="crm-header-v2__link {% if request.path == '/dashboard/' %}is-active{% endif %}" href="{% url 'dashboard_home' %}">
+                    Dashboard
+                </a>
+
+                {% if perms.clients.view_client %}
+                    <a class="crm-header-v2__link {% if '/clients/' in request.path %}is-active{% endif %}" href="/clients/">
+                        Clients
+                    </a>
+                {% endif %}
+
+                {% if perms.sales.view_opportunity %}
+                    <div class="crm-header-v2__group">
+                        <a class="crm-header-v2__link {% if '/sales/' in request.path %}is-active{% endif %}" href="/sales/">
+                            Sales
+                        </a>
+
+                        <div class="crm-header-v2__dropdown">
+                            <a href="/sales/">Opportunities</a>
+                            <a href="/sales/kanban/">Kanban Board</a>
+                            {% if perms.sales.add_opportunity %}
+                                <a href="/sales/create/">Create Opportunity</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if perms.projects.view_project %}
+                    <div class="crm-header-v2__group">
+                        <a class="crm-header-v2__link {% if '/projects/' in request.path %}is-active{% endif %}" href="/projects/">
+                            Projects
+                        </a>
+
+                        <div class="crm-header-v2__dropdown">
+                            <a href="/projects/">Project List</a>
+                            {% if perms.projects.add_project %}
+                                <a href="/projects/create/">Create Project</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if perms.workforce.view_assigned_projects %}
+                    <a class="crm-header-v2__link {% if '/workforce/' in request.path %}is-active{% endif %}" href="/workforce/">
+                        Field Work
+                    </a>
+                {% endif %}
+
+                {% if perms.media_assets.view_projectphoto %}
+                    <a class="crm-header-v2__link {% if '/media-assets/' in request.path %}is-active{% endif %}" href="/media-assets/">
+                        Photos
+                    </a>
+                {% endif %}
+
+                {% if perms.visits.view_technicalvisit %}
+                    <div class="crm-header-v2__group">
+                        <a class="crm-header-v2__link {% if '/visits/' in request.path %}is-active{% endif %}" href="/visits/">
+                            Visits
+                        </a>
+
+                        <div class="crm-header-v2__dropdown">
+                            <a href="/visits/">Visit List</a>
+                            {% if perms.visits.add_technicalvisit %}
+                                <a href="/visits/create/">Schedule Visit</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if perms.billing.view_accountreceivable %}
+                    <a class="crm-header-v2__link {% if '/billing/' in request.path %}is-active{% endif %}" href="/billing/">
+                        Billing
+                    </a>
+                {% endif %}
+
+                {% if perms.users.view_user or perms.auth.view_group or perms.users.view_useraccesslog %}
+                    <div class="crm-header-v2__group">
+                        <button class="crm-header-v2__link crm-header-v2__button" type="button">
+                            Admin
+                        </button>
+
+                        <div class="crm-header-v2__dropdown">
+                            {% if perms.users.view_user %}
+                                <a href="/users/">Users</a>
+                            {% endif %}
+
+                            {% if perms.auth.view_group %}
+                                <a href="/users/roles/">Roles</a>
+                            {% endif %}
+
+                            {% if perms.users.view_useraccesslog %}
+                                <a href="/users/access-logs/">Access Logs</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </nav>
+        {% endif %}
+
+        <div class="crm-header-v2__actions">
+
+            <form class="crm-header-v2__language" action="{% url 'set_language' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+                {% get_current_language as LANGUAGE_CODE %}
+
+                <label class="crm-sr-only" for="crm-language-select">Language</label>
+                <select id="crm-language-select" name="language" onchange="this.form.submit()">
+                    <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>EN</option>
+                    <option value="es" {% if LANGUAGE_CODE == 'es' %}selected{% endif %}>ES</option>
+                </select>
+            </form>
+
+            {% if request.user.is_authenticated %}
+                <a class="crm-header-v2__user" href="{% url 'users:profile' %}">
+                    <span class="crm-header-v2__user-avatar">
+                        {{ request.user.get_full_name|default:request.user.username|slice:":1"|upper }}
+                    </span>
+
+                    <span class="crm-header-v2__user-text">
+                        <span class="crm-header-v2__user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+                        <span class="crm-header-v2__user-label">Profile</span>
+                    </span>
+                </a>
+
+                <form class="crm-header-v2__logout" action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="crm-header-v2__logout-button">Logout</button>
+                </form>
+
+                <button class="crm-header-v2__toggle" type="button" data-crm-menu-toggle aria-expanded="false" aria-controls="crm-mobile-menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span class="crm-sr-only">Open Menu</span>
+                </button>
+            {% else %}
+                <a href="{% url 'login' %}" class="crm-header-v2__login">Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if request.user.is_authenticated %}
+        <div class="crm-mobile-backdrop-v2" data-crm-mobile-backdrop hidden></div>
+
+        <aside id="crm-mobile-menu" class="crm-mobile-menu-v2" data-crm-mobile-menu aria-hidden="true">
+            <div class="crm-mobile-menu-v2__header">
+                <div>
+                    <p class="crm-mobile-menu-v2__eyebrow">CRM Construction</p>
+                    <h2 class="crm-mobile-menu-v2__title">Menu</h2>
+                </div>
+
+                <button class="crm-mobile-menu-v2__close" type="button" data-crm-menu-close>
+                    <span class="crm-sr-only">Close Menu</span>
+                    ×
+                </button>
+            </div>
+
+            <nav class="crm-mobile-menu-v2__nav" aria-label="Mobile Navigation">
+                <a href="{% url 'dashboard_home' %}">Dashboard</a>
+
+                {% if perms.clients.view_client %}
+                    <a href="/clients/">Clients</a>
+                {% endif %}
+
+                {% if perms.sales.view_opportunity %}
+                    <details {% if '/sales/' in request.path %}open{% endif %}>
+                        <summary>Sales</summary>
+                        <a href="/sales/">Opportunities</a>
+                        <a href="/sales/kanban/">Kanban Board</a>
+                        {% if perms.sales.add_opportunity %}
+                            <a href="/sales/create/">Create Opportunity</a>
+                        {% endif %}
+                    </details>
+                {% endif %}
+
+                {% if perms.projects.view_project %}
+                    <details {% if '/projects/' in request.path %}open{% endif %}>
+                        <summary>Projects</summary>
+                        <a href="/projects/">Project List</a>
+                        {% if perms.projects.add_project %}
+                            <a href="/projects/create/">Create Project</a>
+                        {% endif %}
+                    </details>
+                {% endif %}
+
+                {% if perms.workforce.view_assigned_projects %}
+                    <a href="/workforce/">Field Work</a>
+                {% endif %}
+
+                {% if perms.media_assets.view_projectphoto %}
+                    <a href="/media-assets/">Photos</a>
+                {% endif %}
+
+                {% if perms.visits.view_technicalvisit %}
+                    <details {% if '/visits/' in request.path %}open{% endif %}>
+                        <summary>Visits</summary>
+                        <a href="/visits/">Visit List</a>
+                        {% if perms.visits.add_technicalvisit %}
+                            <a href="/visits/create/">Schedule Visit</a>
+                        {% endif %}
+                    </details>
+                {% endif %}
+
+                {% if perms.billing.view_accountreceivable %}
+                    <a href="/billing/">Billing</a>
+                {% endif %}
+
+                {% if perms.users.view_user or perms.auth.view_group or perms.users.view_useraccesslog %}
+                    <details>
+                        <summary>Admin</summary>
+
+                        {% if perms.users.view_user %}
+                            <a href="/users/">Users</a>
+                        {% endif %}
+
+                        {% if perms.auth.view_group %}
+                            <a href="/users/roles/">Roles</a>
+                        {% endif %}
+
+                        {% if perms.users.view_useraccesslog %}
+                            <a href="/users/access-logs/">Access Logs</a>
+                        {% endif %}
+                    </details>
+                {% endif %}
+            </nav>
+
+            <div class="crm-mobile-menu-v2__footer">
+                <a href="{% url 'users:profile' %}" class="crm-mobile-menu-v2__profile">My Profile</a>
+
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="crm-mobile-menu-v2__logout">Logout</button>
+                </form>
+            </div>
+        </aside>
+    {% endif %}
+</header>

@@ -1,18 +1,81 @@
 {% extends "base.html" %}
+
+{% block title %}Roles and Permissions | CRM Construction{% endblock %}
+
 {% block content %}
-  <h1>Roles y permisos</h1>
+<div class="crm-page-shell">
 
-  <p><a href="{% url 'users:role_create' %}">Crear rol</a></p>
+    <div class="crm-page-header">
+        <div class="crm-page-header__content">
+            <p class="crm-page-header__eyebrow">Administration</p>
+            <h1 class="crm-page-header__title">System Roles</h1>
+            <p class="crm-page-header__description">Manage access groups and permissions used across the CRM.</p>
+        </div>
 
-  <ul>
-    {% for role in roles %}
-      <li>
-        <strong>{{ role.name }}</strong>
-        ({{ role.user_count }} usuario{{ role.user_count|pluralize }})
-        - <a href="{% url 'users:role_update' role.pk %}">Editar</a>
-      </li>
-    {% empty %}
-      <li>No hay roles creados.</li>
-    {% endfor %}
-  </ul>
+        <div class="crm-page-header__actions">
+            <a href="{% url 'users:role_create' %}" class="crm-btn crm-btn--primary">Create Role</a>
+            <a href="{% url 'users:list' %}" class="crm-btn crm-btn--outline">Back to Users</a>
+        </div>
+    </div>
+
+    <section class="crm-table-card is-mobile-cards">
+        <div class="crm-table-toolbar">
+            <h2 class="crm-table-toolbar__title">Roles</h2>
+        </div>
+
+        <div class="crm-table-wrap">
+            <table class="crm-table">
+                <thead>
+                    <tr>
+                        <th>Role Name</th>
+                        <th>Assigned Users</th>
+                        <th class="crm-hide-mobile">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for role in roles %}
+                        <tr>
+                            <td>
+                                <span class="crm-table__primary">{{ role.name }}</span>
+                            </td>
+
+                            <td>{{ role.user_count }} user{{ role.user_count|pluralize }}</td>
+
+                            <td>
+                                <div class="crm-row-actions">
+                                    <a href="{% url 'users:role_update' role.pk %}" class="crm-btn crm-btn--sm crm-btn--outline">Edit</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3">
+                                {% include "includes/empty_state.html" with title="No roles found" description="Create the first role to organize CRM access." action_url="/users/roles/create/" action_label="Create Role" %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="crm-mobile-card-list">
+            {% for role in roles %}
+                <article class="crm-mobile-card">
+                    <div class="crm-mobile-card__header">
+                        <div>
+                            <h2 class="crm-mobile-card__title">{{ role.name }}</h2>
+                            <p class="crm-mobile-card__subtitle">{{ role.user_count }} user{{ role.user_count|pluralize }}</p>
+                        </div>
+                    </div>
+
+                    <div class="crm-mobile-card__actions">
+                        <a href="{% url 'users:role_update' role.pk %}" class="crm-btn crm-btn--outline">Edit Role</a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
 {% endblock %}

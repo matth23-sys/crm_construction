@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}{{ opportunity.title }} | CRM Construction{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">{{ opportunity.title }}</h2>
+        <div>
+            <a href="{% url 'sales:edit' opportunity.pk %}" class="btn btn-sm btn-outline">Editar</a>
+            <a href="{% url 'sales:list' %}" class="btn btn-sm btn-outline">Volver</a>
+            <a href="{% url 'sales:kanban' %}" class="btn btn-sm btn-outline">Kanban</a>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-item">
+            <div class="detail-label">Cliente</div>
+            <div class="detail-value">{{ opportunity.client }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Etapa</div>
+            <div class="detail-value"><span class="badge badge-primary">{{ opportunity.stage }}</span></div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Responsable</div>
+            <div class="detail-value">{{ opportunity.responsible|default:"No asignado" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Valor estimado</div>
+            <div class="detail-value">$ {{ opportunity.estimated_value|floatformat:2 }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Cambiar etapa</h3>
+    </div>
+    <form method="post" action="{% url 'sales:move' opportunity.pk %}">
+        {% csrf_token %}
+
+        {{ move_form.non_field_errors }}
+
+        <div class="form-group">
+            <label for="{{ move_form.to_stage.id_for_label }}" class="form-label">Nueva etapa</label>
+            {{ move_form.to_stage }}
+            {{ move_form.to_stage.errors }}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ move_form.note.id_for_label }}" class="form-label">Nota (opcional)</label>
+            {{ move_form.note }}
+            {{ move_form.note.errors }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Mover</button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Historial de etapas</h3>
+    </div>
+    <ul class="log-list">
+        {% for history in opportunity.stage_history.all %}
+            <li class="log-item">
+                <div>
+                    <strong>{{ history.moved_at|date:"d/m/Y H:i" }}</strong><br>
+                    <span class="badge badge-info">{{ history.from_stage|default:"Inicio" }} → {{ history.to_stage }}</span>
+                </div>
+                <div class="text-muted">
+                    Por: {{ history.changed_by }}<br>
+                    {% if history.note %}{{ history.note }}{% endif %}
+                </div>
+            </li>
+        {% empty %}
+            <li class="log-item text-muted">No hay historial de etapas.</li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% if perms.sales.convert_opportunity %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Convertir a proyecto</h3>
+    </div>
+    {% if has_related_project %}
+        <p>Esta oportunidad ya está vinculada a un proyecto.</p>
+        <a href="{% url 'projects:detail' related_project.pk %}" class="btn btn-primary">Ver proyecto relacionado</a>
+    {% elif opportunity.stage.is_won_stage %}
+        <form method="post" action="{% url 'sales:convert' opportunity.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Convertir a proyecto</button>
+        </form>
+    {% else %}
+        <p class="text-muted">La oportunidad debe estar en etapa "Ganada" para convertirla a proyecto.</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

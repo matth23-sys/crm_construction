@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* Reset y estilos propios */
+  .kanban-container {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    padding: 1rem 0.5rem 2rem;
+    align-items: flex-start;
+  }
+
+  .kanban-column {
+    background-color: #f4f5f7;
+    border-radius: 12px;
+    min-width: 300px;
+    width: 320px;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  }
+
+  .column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+  }
+
+  .column-title {
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: uppercase;
+    color: #172b4d;
+  }
+
+  .column-badge {
+    background-color: #ebecf0;
+    border-radius: 20px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #42526e;
+  }
+
+  .kanban-cards {
+    min-height: 300px;
+    max-height: 70vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .kanban-card {
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    border-left: 4px solid #0052cc;
+  }
+
+  .card-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .card-title a {
+    text-decoration: none;
+    color: #172b4d;
+  }
+
+  .card-title a:hover {
+    text-decoration: underline;
+  }
+
+  .card-client {
+    font-size: 0.75rem;
+    color: #5e6c84;
+    margin-bottom: 0.5rem;
+  }
+
+  .card-value {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #00875a;
+    background: #e3fcef;
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+  }
+
+  .empty-cards {
+    color: #6b778c;
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.8rem;
+    background: #fafbfc;
+    border-radius: 8px;
+  }
+
+  .btn-primary {
+    background-color: #0052cc;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: 500;
+  }
+
+  .btn-primary:hover {
+    background-color: #0747a6;
+  }
+
+  .d-flex {
+    display: flex;
+  }
+
+  .justify-content-between {
+    justify-content: space-between;
+  }
+
+  .align-items-center {
+    align-items: center;
+  }
+
+  .mb-4 {
+    margin-bottom: 1.5rem;
+  }
+
+  select.form-select-sm {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Tablero Kanban</h2>
+  <a href="{% url 'sales:create' %}" class="btn-primary">+ Nueva oportunidad</a>
+</div>
+
+<div class="kanban-container">
+  {% for stage_id, stage_data in board.items %}
+  <div class="kanban-column" data-stage-id="{{ stage_id }}">
+    <div class="column-header">
+      <span class="column-title">{{ stage_data.stage.name }}</span>
+      <span class="column-badge">{{ stage_data.opportunities|length }}</span>
+    </div>
+    <div class="kanban-cards" data-stage="{{ stage_id }}">
+      {% for opp in stage_data.opportunities %}
+      <div class="kanban-card">
+        <div class="card-title">
+          <a href="{% url 'sales:detail' opp.pk %}">{{ opp.title|truncatechars:40 }}</a>
+        </div>
+        <div class="card-client">
+          🏢 {{ opp.client.commercial_name|default:opp.client.legal_name|truncatechars:25 }}
+        </div>
+        <div class="card-value">
+          $ {{ opp.estimated_value|floatformat:0 }}
+        </div>
+        <div style="margin-top: 0.6rem;">
+          <form method="post" action="{% url 'sales:move' opp.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <select name="to_stage" class="form-select-sm" onchange="this.form.submit()">
+              <option value="">Mover a...</option>
+              {% for sid, sdata in board.items %}
+                <option value="{{ sid }}" {% if sid == stage_id %}selected disabled{% endif %}>{{ sdata.stage.name }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </div>
+      </div>
+      {% empty %}
+      <div class="empty-cards">Sin oportunidades</div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
